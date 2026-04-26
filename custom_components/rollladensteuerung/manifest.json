@@ -1,8 +1,8 @@
 {
   "domain": "rollladensteuerung",
   "name": "Rollladensteuerung",
-  "config_flow": true,
   "codeowners": ["@revilo91"],
+  "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/revilo91/rollladensteuerung",
   "integration_type": "hub",
