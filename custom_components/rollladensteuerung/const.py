@@ -15,4 +15,4 @@ CONF_HOEHE_NACHT         = "hoehe_nacht"
 CONF_HOEHE_TAG           = "hoehe_tag"
 CONF_HOEHE_SCHLAFEN      = "hoehe_schlafen"
 
-BESCHATTUNG_OFF_DELAY    = 240  # 4 Minuten – spiegelt blueprint "for: 00:04:00"
+BESCHATTUNG_OFF_DELAY    = 240  # 4 minutes off-delay for shading hysteresis

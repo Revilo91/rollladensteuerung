@@ -1,4 +1,4 @@
-"""Rollladensteuerung – Home Assistant Custom Integration."""
+"""Rollladensteuerung – Home Assistant custom integration."""
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 

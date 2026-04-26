@@ -1,4 +1,4 @@
-"""Diagnostik-Sensor – zeigt den letzten Entscheidungsgrund."""
+"""Diagnostic sensor – shows the last decision reason."""
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -26,7 +26,7 @@ class RollladenStatusSensor(SensorEntity):
         self._ctrl = ctrl
         cover = entry.data[CONF_COVER]
         self._attr_unique_id = f"{DOMAIN}_{cover}_status"
-        self._attr_name = f"Rollladensteuerung {cover}"
+        self._attr_name = f"Cover Control {cover}"
 
     @property
     def native_value(self) -> str:

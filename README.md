@@ -3,76 +3,76 @@
 [![HACS Custom][hacs-badge]][hacs-url]
 [![Validate][validate-badge]][validate-url]
 
-Eine Home Assistant Custom Integration, die die Logik des `Rollladensteuerung 2`-Blueprints als eigenständige Integration abbildet – konfigurierbar über die UI, keine YAML-Automationen nötig.
+A Home Assistant custom integration for automated cover/shutter control – configurable via the UI, no YAML automations required.
 
 ## Features
 
-- Pro Cover eine eigene Config-Entry-Instanz
-- Vollständige Blueprint-Logik in Python:
-  - Nacht-/Tag-Beschattung mit konfigurierbaren Höhen
-  - Fenster-/Türkontakt-Erkennung (mehrere Sensoren pro Cover)
-  - Richtungsbasierte Beschattung (`binary_sensor.richtung<suffix>`)
-  - PC-Beschattung (separate Richtungslogik)
-  - Kino-/Filmeabend-Modus
-  - Morgens-Öffnen-Funktion
-  - Schlafen- und Zu-Modus
-  - Beschattungs-Hysterese mit 4-Minuten-Verzögerung beim Abschalten
-- Diagnostik-Sensor je Cover mit letztem Entscheidungsgrund
+- One config entry per cover
+- Full shading logic in Python:
+  - Night/day shading with configurable positions
+  - Window/door contact detection (multiple sensors per cover)
+  - Direction-based shading (`binary_sensor.richtung<suffix>`)
+  - PC-based shading (separate direction logic)
+  - Cinema/movie-night mode
+  - Morning-open function
+  - Sleep and closed mode
+  - Shading hysteresis with 4-minute off-delay
+- Diagnostic sensor per cover showing the last decision reason
 
 ## Installation via HACS
 
-1. HACS → Integrationen → ⋮ → Custom Repositories
+1. HACS → Integrations → ⋮ → Custom Repositories
 2. URL: `https://github.com/revilo91/rollladensteuerung`
-3. Kategorie: `Integration`
-4. Repository hinzufügen, dann installieren
+3. Category: `Integration`
+4. Add repository, then install
 
-## Manuelle Installation
+## Manual Installation
 
 ```bash
 cp -r custom_components/rollladensteuerung \
       /config/custom_components/rollladensteuerung
 ```
 
-HA neu starten.
+Restart HA.
 
-## Konfiguration
+## Configuration
 
-**Einstellungen → Integrationen → + Hinzufügen → Rollladensteuerung**
+**Settings → Integrations → + Add → Rollladensteuerung**
 
-| Feld | Pflicht | Beschreibung |
+| Field | Required | Description |
 |---|---|---|
-| Cover-Entität | ✅ | Die zu steuernde `cover.*`-Entität |
-| Fenster-/Türkontakte | – | Mehrere `binary_sensor.*` möglich |
-| Richtungs-Suffix | – | z. B. `suden` → `binary_sensor.richtungsuden` |
-| Raum-Automatik | ✅ | `input_select.*` mit Werten wie `Automatik`, `Erzwungen`, `Inaktiv`, `Manuell`, `PC Automatik`, `PC Erzwungen`, `Schlafen`, `Zu` |
-| Beschattungs-Hysterese | ✅ | `binary_sensor.beschattung_hysterese` |
-| Tag/Nacht-Modus | ✅ | `input_boolean.tag_nacht_modus` |
-| Höhe Nacht | ✅ | `input_number.beschattungshohe_nacht` |
-| Höhe Tag | ✅ | `input_number.beschattungshohe_tag` |
-| Höhe Schlafen | – | `input_number.beschattungshohe_schlafen` |
-| PC-Schalter | – | `switch.buro_steckdose_*` o. ä. |
-| Kino-Schalter | – | `switch.kino` |
-| Morgens-Auf Schalter | – | `switch.rolllade_ankleide_morgens_auf` |
-| Morgens-Funktion aktiv | – | Boolean – ersetzt das Blueprint-Label |
-| Filmeabend-Funktion aktiv | – | Boolean – ersetzt das Blueprint-Label |
+| Cover entity | ✅ | The `cover.*` entity to control |
+| Window/door contacts | – | Multiple `binary_sensor.*` supported |
+| Direction suffix | – | e.g. `suden` → `binary_sensor.richtungsuden` |
+| Room automation | ✅ | `input_select.*` with values like `Automatik`, `Erzwungen`, `Inaktiv`, `Manuell`, `PC Automatik`, `PC Erzwungen`, `Schlafen`, `Zu` |
+| Shading hysteresis | ✅ | `binary_sensor.beschattung_hysterese` |
+| Day/night mode | ✅ | `input_boolean.tag_nacht_modus` |
+| Night position | ✅ | `input_number.beschattungshohe_nacht` |
+| Day position | ✅ | `input_number.beschattungshohe_tag` |
+| Sleep position | – | `input_number.beschattungshohe_schlafen` |
+| PC switch | – | `switch.buro_steckdose_*` or similar |
+| Cinema switch | – | `switch.kino` |
+| Morning-open switch | – | `switch.rolllade_ankleide_morgens_auf` |
+| Morning function active | – | Boolean – enables the morning-open feature for this cover |
+| Cinema function active | – | Boolean – enables the cinema/movie-night feature for this cover |
 
-## Entscheidungslogik (Priorität)
+## Decision Logic (Priority)
 
 ```
-1. Nacht + Fenster offen           → Nacht-Höhe
-2. Tür offen (kein Fenster)        → Öffnen
-3. Nacht + Morgens-Modus aktiv     → Nacht-Höhe
-4. Nacht + geschlossen             → Schließen
-5. Filmeabend-Label + Kino aktiv   → Schließen
-6. Tag + Schlafen                  → Schlafen-Höhe
-7. Raum = Zu                       → Schließen
-8. Tag + Beschattung + Richtung    → Tag-Höhe
-9. Standard                        → Tag: Öffnen / Nacht: Schließen
+1. Night + window open             → Night position
+2. Door open (no window sensor)    → Open
+3. Night + morning mode active     → Night position
+4. Night + closed                  → Close
+5. Cinema mode active              → Close
+6. Day + sleep mode                → Sleep position
+7. Room = closed                   → Close
+8. Day + shading + direction       → Day position
+9. Default                         → Day: Open / Night: Close
 ```
 
-## Diagnostik-Sensor
+## Diagnostic Sensor
 
-Jede Instanz erzeugt einen Sensor `sensor.rollladensteuerung_<cover>` mit dem letzten Entscheidungsgrund als `state`.
+Each instance creates a sensor `sensor.rollladensteuerung_<cover>` with the last decision reason as its `state`.
 
 [hacs-badge]: https://img.shields.io/badge/HACS-Custom-orange.svg
 [hacs-url]: https://hacs.xyz

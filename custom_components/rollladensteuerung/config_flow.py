@@ -1,4 +1,4 @@
-"""Config Flow für Rollladensteuerung."""
+"""Config flow for Rollladensteuerung."""
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.helpers import selector

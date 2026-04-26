@@ -34,7 +34,7 @@ class RollladenController:
         self._cfg = entry.data
         self._unsubs: list[Callable] = []
         self._beschattung_off_unsub: Optional[Callable] = None
-        self.last_reason: str = "Initialisierung"
+        self.last_reason: str = "Initializing"
 
     # ------------------------------------------------------------------ setup
 
@@ -53,7 +53,7 @@ class RollladenController:
                 new = new_state.state if new_state else None
 
                 if old == STATE_ON and new != STATE_ON:
-                    # on→off: verzögertes Auswerten (4 min, wie blueprint "for: 00:04:00")
+                    # on→off: delayed evaluation (4 min off-delay)
                     if self._beschattung_off_unsub:
                         self._beschattung_off_unsub()
                     self._beschattung_off_unsub = async_call_later(
@@ -63,7 +63,7 @@ class RollladenController:
                     )
                     return
                 elif new == STATE_ON and old != STATE_ON:
-                    # off→on: sofortige Auswertung, pending Task abbrechen
+                    # off→on: immediate evaluation, cancel pending task
                     if self._beschattung_off_unsub:
                         self._beschattung_off_unsub()
                         self._beschattung_off_unsub = None
@@ -74,7 +74,7 @@ class RollladenController:
             async_track_state_change_event(self.hass, watch, _on_state_change)
         )
         _LOGGER.debug(
-            "RollladenController für %s gestartet, überwacht: %s",
+            "RollladenController for %s started, watching: %s",
             self._cfg[CONF_COVER],
             watch,
         )
@@ -152,7 +152,7 @@ class RollladenController:
 
     @property
     def _rs(self) -> str:
-        """Aktueller Zustand des Raum-input_select."""
+        """Current state of the room input_select."""
         return self._state(self._cfg[CONF_ROOM_SWITCH]) or ""
 
     @property
@@ -202,55 +202,55 @@ class RollladenController:
     async def _evaluate(self) -> None:
         cover = self._cfg[CONF_COVER]
 
-        # 1. Nacht + Fenster offen → Nacht-Höhe
+        # 1. Night + window open → night position
         if not self._is_day and self._is_window and self._is_window_open:
-            self.last_reason = "Nacht + Fenster offen → Nacht-Höhe"
+            self.last_reason = "Night + window open → night position"
             await self._set_pos(cover, self._numeric(self._cfg[CONF_HOEHE_NACHT]))
             return
 
-        # 2. Tür offen (kein Fenster-Sensor) → Öffnen
+        # 2. Door open (no window sensor) → open
         if not self._is_window and self._is_window_open:
-            self.last_reason = "Tür offen → Öffnen"
+            self.last_reason = "Door open → open"
             await self._open(cover)
             return
 
-        # 3. Nacht + morgens-Label + morgens_auf + Beschattung im Raum aktiv
+        # 3. Night + morning label + morning switch + shading active
         if (
             not self._is_day
             and self._cfg.get(CONF_IS_MORGENS_LABEL)
             and self._is_on(self._cfg.get(CONF_MORGENS_AUF_SWITCH))
             and self._beschattung_aktiv
         ):
-            self.last_reason = "Morgens-Modus (Nacht) → Nacht-Höhe"
+            self.last_reason = "Morning mode (night) → night position"
             await self._set_pos(cover, self._numeric(self._cfg[CONF_HOEHE_NACHT]))
             return
 
-        # 4. Nacht + geschlossen → Schließen
+        # 4. Night + closed → close
         if not self._is_window_open and not self._is_day:
-            self.last_reason = "Nacht + geschlossen → Schließen"
+            self.last_reason = "Night + closed → close"
             await self._close(cover)
             return
 
-        # 5. Filmeabend
+        # 5. Cinema mode
         if self._is_on(self._cfg.get(CONF_KINO_SWITCH)) and self._cfg.get(CONF_IS_FILMEABEND_LABEL):
-            self.last_reason = "Filmeabend → Schließen"
+            self.last_reason = "Cinema mode → close"
             await self._close(cover)
             return
 
-        # 6. Tag + Schlafen-Modus
+        # 6. Day + sleep mode
         if self._is_day and "Schlafen" in self._rs:
             if schlafen := self._cfg.get(CONF_HOEHE_SCHLAFEN):
-                self.last_reason = "Schlafen-Höhe"
+                self.last_reason = "Sleep position"
                 await self._set_pos(cover, self._numeric(schlafen))
                 return
 
-        # 7. Raum zwingend geschlossen
+        # 7. Room forced closed
         if "Zu" in self._rs:
-            self.last_reason = "Raum: Zu → Schließen"
+            self.last_reason = "Room: closed → close"
             await self._close(cover)
             return
 
-        # 8. Tag + Beschattung aktiv + Richtungs-/PC-Logik
+        # 8. Day + shading active + direction/PC logic
         window_or_closed_door = self._is_window or (not self._is_window and not self._is_window_open)
 
         shading = (
@@ -267,16 +267,16 @@ class RollladenController:
         )
 
         if self._beschattung_aktiv and self._is_day and window_or_closed_door and shading:
-            self.last_reason = "Tag-Beschattung aktiv → Tag-Höhe"
+            self.last_reason = "Day shading active → day position"
             await self._set_pos(cover, self._numeric(self._cfg[CONF_HOEHE_TAG]))
             return
 
-        # 9. Standard-Fallback
+        # 9. Default fallback
         if self._is_day:
-            self.last_reason = "Standard: Tag → Öffnen"
+            self.last_reason = "Default: day → open"
             await self._open(cover)
         else:
-            self.last_reason = "Standard: Nacht → Schließen"
+            self.last_reason = "Default: night → close"
             await self._close(cover)
 
     # ---------------------------------------------------------- cover calls
