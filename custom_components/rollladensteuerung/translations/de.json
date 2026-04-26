@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Rollladensteuerung einrichten",
+        "description": "Konfiguriere einen gesteuerten Rollladen.",
+        "data": {
+          "cover_entity": "Rolllade (Cover-Entität)",
+          "window_entities": "Fenster- / Türkontakte (binary_sensor)",
+          "direction": "Richtungs-Suffix für Beschattungssensor (z. B. suden, westen)",
+          "room_switch": "Raum-Automatik (input_select)",
+          "beschattung_hysterese": "Beschattungs-Hysterese Sensor",
+          "tag_nacht_modus": "Tag/Nacht-Modus (input_boolean)",
+          "hoehe_nacht": "Beschattungshöhe Nacht (input_number)",
+          "hoehe_tag": "Beschattungshöhe Tag (input_number)",
+          "hoehe_schlafen": "Beschattungshöhe Schlafen (optional)",
+          "pc_switch": "PC-Schalter (optional)",
+          "kino_switch": "Kino-Schalter (optional)",
+          "morgens_auf_switch": "Morgens-Auf Schalter (optional)",
+          "is_morgens_label": "Morgens-Funktion für diesen Rollladen aktiv?",
+          "is_filmeabend_label": "Filmeabend-Funktion für diesen Rollladen aktiv?"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Dieser Rollladen ist bereits konfiguriert."
+    }
+  }
+}
