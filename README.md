@@ -1,4 +1,4 @@
-# Rollladensteuerung
+# Cover Control (rollladensteuerung)
 
 [![HACS Custom][hacs-badge]][hacs-url]
 [![Validate][validate-badge]][validate-url]
@@ -37,22 +37,22 @@ Restart HA.
 
 ## Configuration
 
-**Settings → Integrations → + Add → Rollladensteuerung**
+**Settings → Integrations → + Add → Cover Control**
 
 | Field | Required | Description |
 |---|---|---|
 | Cover entity | ✅ | The `cover.*` entity to control |
 | Window/door contacts | – | Multiple `binary_sensor.*` supported |
-| Direction suffix | – | e.g. `suden` → `binary_sensor.richtungsuden` |
-| Room automation | ✅ | `input_select.*` with values like `Automatik`, `Erzwungen`, `Inaktiv`, `Manuell`, `PC Automatik`, `PC Erzwungen`, `Schlafen`, `Zu` |
-| Shading hysteresis | ✅ | `binary_sensor.beschattung_hysterese` |
-| Day/night mode | ✅ | `input_boolean.tag_nacht_modus` |
-| Night position | ✅ | `input_number.beschattungshohe_nacht` |
-| Day position | ✅ | `input_number.beschattungshohe_tag` |
-| Sleep position | – | `input_number.beschattungshohe_schlafen` |
+| Direction suffix | – | e.g. `south` → `binary_sensor.richtungsouth` |
+| Room automation | ✅ | `input_select.*` with values like `Automatic`, `Forced`, `Inactive`, `Manual`, `PC Automatic`, `PC Forced`, `Sleep`, `Closed` |
+| Shading hysteresis | ✅ | `binary_sensor.shading_hysteresis` |
+| Day/night mode | ✅ | `input_boolean.day_night_mode` |
+| Night position | ✅ | `input_number.night_shading_position` |
+| Day position | ✅ | `input_number.day_shading_position` |
+| Sleep position | – | `input_number.sleep_shading_position` |
 | PC switch | – | `switch.buro_steckdose_*` or similar |
-| Cinema switch | – | `switch.kino` |
-| Morning-open switch | – | `switch.rolllade_ankleide_morgens_auf` |
+| Cinema switch | – | `switch.cinema` |
+| Morning-open switch | – | `switch.morning_open` |
 | Morning function active | – | Boolean – enables the morning-open feature for this cover |
 | Cinema function active | – | Boolean – enables the cinema/movie-night feature for this cover |
 

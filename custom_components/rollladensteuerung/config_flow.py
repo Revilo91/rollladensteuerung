@@ -4,19 +4,19 @@ from homeassistant import config_entries
 from homeassistant.helpers import selector
 
 from .const import (
-    CONF_BESCHATTUNG_HYSTERESE,
+    CONF_CINEMA_SWITCH,
     CONF_COVER,
+    CONF_DAY_NIGHT_MODE,
+    CONF_DAY_POSITION,
     CONF_DIRECTION,
-    CONF_HOEHE_NACHT,
-    CONF_HOEHE_SCHLAFEN,
-    CONF_HOEHE_TAG,
-    CONF_IS_FILMEABEND_LABEL,
-    CONF_IS_MORGENS_LABEL,
-    CONF_KINO_SWITCH,
-    CONF_MORGENS_AUF_SWITCH,
+    CONF_ENABLE_CINEMA_MODE,
+    CONF_ENABLE_MORNING_MODE,
+    CONF_MORNING_OPEN_SWITCH,
+    CONF_NIGHT_POSITION,
     CONF_PC_SWITCH,
     CONF_ROOM_SWITCH,
-    CONF_TAG_NACHT_MODUS,
+    CONF_SHADING_HYSTERESIS,
+    CONF_SLEEP_POSITION,
     CONF_WINDOW_ENTITIES,
     DOMAIN,
 )
@@ -34,49 +34,49 @@ _SCHEMA = vol.Schema(
             selector.EntitySelectorConfig(domain="input_select")
         ),
         vol.Required(
-            CONF_BESCHATTUNG_HYSTERESE,
-            default="binary_sensor.beschattung_hysterese",
+            CONF_SHADING_HYSTERESIS,
+            default="binary_sensor.shading_hysteresis",
         ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="binary_sensor")
         ),
         vol.Required(
-            CONF_TAG_NACHT_MODUS,
-            default="input_boolean.tag_nacht_modus",
+            CONF_DAY_NIGHT_MODE,
+            default="input_boolean.day_night_mode",
         ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_boolean")
         ),
         vol.Required(
-            CONF_HOEHE_NACHT,
-            default="input_number.beschattungshohe_nacht",
+            CONF_NIGHT_POSITION,
+            default="input_number.night_shading_position",
         ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_number")
         ),
         vol.Required(
-            CONF_HOEHE_TAG,
-            default="input_number.beschattungshohe_tag",
+            CONF_DAY_POSITION,
+            default="input_number.day_shading_position",
         ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_number")
         ),
-        vol.Optional(CONF_HOEHE_SCHLAFEN): selector.EntitySelector(
+        vol.Optional(CONF_SLEEP_POSITION): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_number")
         ),
         vol.Optional(CONF_PC_SWITCH): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="switch")
         ),
-        vol.Optional(CONF_KINO_SWITCH): selector.EntitySelector(
+        vol.Optional(CONF_CINEMA_SWITCH): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="switch")
         ),
-        vol.Optional(CONF_MORGENS_AUF_SWITCH): selector.EntitySelector(
+        vol.Optional(CONF_MORNING_OPEN_SWITCH): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="switch")
         ),
-        vol.Optional(CONF_IS_MORGENS_LABEL, default=False): selector.BooleanSelector(),
-        vol.Optional(CONF_IS_FILMEABEND_LABEL, default=False): selector.BooleanSelector(),
+        vol.Optional(CONF_ENABLE_MORNING_MODE, default=False): selector.BooleanSelector(),
+        vol.Optional(CONF_ENABLE_CINEMA_MODE, default=False): selector.BooleanSelector(),
     }
 )
 
 
 class RollladensteuerungConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 1
+    VERSION = 2
 
     async def async_step_user(self, user_input=None):
         if user_input is not None:

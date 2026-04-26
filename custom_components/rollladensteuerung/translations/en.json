@@ -2,23 +2,23 @@
   "config": {
     "step": {
       "user": {
-        "title": "Set up Rollladensteuerung",
+        "title": "Set up Cover Control",
         "description": "Configure a shading-controlled cover.",
         "data": {
           "cover_entity": "Cover entity",
           "window_entities": "Window / door contact sensors (binary_sensor)",
           "direction": "Direction suffix for shading sensor (e.g. suden, westen)",
           "room_switch": "Room automation selector (input_select)",
-          "beschattung_hysterese": "Shading hysteresis sensor",
-          "tag_nacht_modus": "Day/night mode (input_boolean)",
-          "hoehe_nacht": "Night shading position (input_number)",
-          "hoehe_tag": "Day shading position (input_number)",
-          "hoehe_schlafen": "Sleep shading position (optional)",
+          "shading_hysteresis": "Shading hysteresis sensor",
+          "day_night_mode": "Day/night mode (input_boolean)",
+          "night_position": "Night shading position (input_number)",
+          "day_position": "Day shading position (input_number)",
+          "sleep_position": "Sleep shading position (optional)",
           "pc_switch": "PC switch (optional)",
-          "kino_switch": "Cinema switch (optional)",
-          "morgens_auf_switch": "Morning-open switch (optional)",
-          "is_morgens_label": "Enable morning function for this cover?",
-          "is_filmeabend_label": "Enable cinema function for this cover?"
+          "cinema_switch": "Cinema switch (optional)",
+          "morning_open_switch": "Morning-open switch (optional)",
+          "enable_morning_mode": "Enable morning function for this cover?",
+          "enable_cinema_mode": "Enable cinema function for this cover?"
         }
       }
     },

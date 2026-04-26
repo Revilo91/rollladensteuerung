@@ -1,6 +1,6 @@
 {
   "domain": "rollladensteuerung",
-  "name": "Rollladensteuerung",
+  "name": "Cover Control",
   "codeowners": ["@revilo91"],
   "config_flow": true,
   "dependencies": [],

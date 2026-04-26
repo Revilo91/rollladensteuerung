@@ -7,23 +7,23 @@
         "data": {
           "cover_entity": "Rolllade (Cover-Entität)",
           "window_entities": "Fenster- / Türkontakte (binary_sensor)",
-          "direction": "Richtungs-Suffix für Beschattungssensor (z. B. suden, westen)",
-          "room_switch": "Raum-Automatik (input_select)",
-          "beschattung_hysterese": "Beschattungs-Hysterese Sensor",
-          "tag_nacht_modus": "Tag/Nacht-Modus (input_boolean)",
-          "hoehe_nacht": "Beschattungshöhe Nacht (input_number)",
-          "hoehe_tag": "Beschattungshöhe Tag (input_number)",
-          "hoehe_schlafen": "Beschattungshöhe Schlafen (optional)",
+          "direction": "Richtungssuffix für den Beschattungssensor (z.B. Süden, Westen)",
+          "room_switch": "Raumautomationsauswahl (input_select)",
+          "shading_hysteresis": "Beschattungshysterese-Sensor",
+          "day_night_mode": "Tag/Nacht-Modus (input_boolean)",
+          "night_position": "Nachtbeschattungsposition (input_number)",
+          "day_position": "Tagesbeschattungsposition (input_number)",
+          "sleep_position": "Schlafbeschattungsposition (optional)",
           "pc_switch": "PC-Schalter (optional)",
-          "kino_switch": "Kino-Schalter (optional)",
-          "morgens_auf_switch": "Morgens-Auf Schalter (optional)",
-          "is_morgens_label": "Morgens-Funktion für diesen Rollladen aktiv?",
-          "is_filmeabend_label": "Filmeabend-Funktion für diesen Rollladen aktiv?"
+          "cinema_switch": "Kino-Schalter (optional)",
+          "morning_open_switch": "Morgenöffnungs-Schalter (optional)",
+          "enable_morning_mode": "Morgenfunktion für diese Rolllade aktivieren?",
+          "enable_cinema_mode": "Kino-Funktion für diese Rolllade aktivieren?"
         }
       }
     },
     "abort": {
-      "already_configured": "Dieser Rollladen ist bereits konfiguriert."
+      "already_configured": "Diese Rolllade ist bereits konfiguriert."
     }
   }
 }

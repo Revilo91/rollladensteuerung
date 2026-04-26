@@ -4,7 +4,13 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import CONF_COVER, DOMAIN
+from .const import (
+    CONF_COVER,
+    CONF_DIRECTION,
+    CONF_ROOM_SWITCH,
+    CONF_WINDOW_ENTITIES,
+    DOMAIN,
+)
 from .controller import RollladenController
 
 
@@ -36,8 +42,8 @@ class RollladenStatusSensor(SensorEntity):
     def extra_state_attributes(self) -> dict:
         cfg = self._entry.data
         return {
-            "cover": cfg.get("cover_entity"),
-            "room_switch": cfg.get("room_switch"),
-            "direction": cfg.get("direction"),
-            "window_entities": cfg.get("window_entities"),
+            "cover": cfg.get(CONF_COVER),
+            "room_switch": cfg.get(CONF_ROOM_SWITCH),
+            "direction": cfg.get(CONF_DIRECTION),
+            "window_entities": cfg.get(CONF_WINDOW_ENTITIES),
         }
