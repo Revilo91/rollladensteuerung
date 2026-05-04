@@ -11,9 +11,9 @@ A Home Assistant custom integration for automated cover/shutter control – conf
 - Full shading logic in Python:
   - Night/day shading with configurable positions
   - Window/door contact detection (multiple sensors per cover)
-  - Direction-based shading (`binary_sensor.richtung<suffix>`)
+  - Sun-position based shading via configured window orientation (north/east/south/west)
   - Event-switch controlled shading events
-  - PC/cinema/morning handling via a shared event switch
+  - Cinema/event handling via a shared event switch
   - Sleep and closed mode
   - Shading hysteresis with 4-minute off-delay
 - Diagnostic sensor per cover showing the last decision reason
@@ -42,8 +42,8 @@ Restart HA.
 |---|---|---|
 | Cover entity | ✅ | The `cover.*` entity to control |
 | Window/door contacts | – | Multiple `binary_sensor.*` supported |
-| Direction suffix | – | e.g. `south` → `binary_sensor.richtungsouth` |
-| Room automation | ✅ | `input_select.*` with values like `Automatic`, `Forced`, `Inactive`, `Manual`, `PC Automatic`, `PC Forced`, `Sleep`, `Closed` |
+| Window orientation | ✅ | `north`, `east`, `south`, or `west` |
+| Room automation | ✅ | `input_select.*` with values like `Automatic`, `Forced`, `Inactive`, `Manual`, `Sleep`, `Closed` |
 | Shading hysteresis | ✅ | `binary_sensor.shading_hysteresis` |
 | Day/night mode | ✅ | `input_boolean.day_night_mode` |
 | Shading height | ✅ | `input_number.*` used as the single target position |
@@ -59,7 +59,7 @@ Restart HA.
 5. Cinema event switch active      → Close
 6. Day + sleep mode                → Shading height
 7. Room = closed                   → Close
-8. Day + shading + direction       → Shading height
+8. Day + shading + sun on side     → Shading height
 9. Default                         → Day: Open / Night: Close
 ```
 

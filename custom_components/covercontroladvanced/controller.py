@@ -10,11 +10,11 @@ from homeassistant.helpers.event import async_call_later, async_track_state_chan
 from .const import (
     CONF_COVER,
     CONF_DAY_NIGHT_MODE,
-    CONF_DIRECTION,
     CONF_EVENT_SWITCH,
     CONF_ROOM_SWITCH,
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
+    CONF_WINDOW_DIRECTION,
     CONF_WINDOW_ENTITIES,
     SHADING_OFF_DELAY,
 )
@@ -87,11 +87,8 @@ class CoverControlAdvancedController:
 
         entities.extend(cfg.get(CONF_WINDOW_ENTITIES) or [])
 
-        if d := cfg.get(CONF_DIRECTION, ""):
-            entities += [
-                f"binary_sensor.richtung{d}",
-                f"binary_sensor.richtung{d}pc",
-            ]
+        if cfg.get(CONF_WINDOW_DIRECTION, ""):
+            entities.append("sun.sun")
 
         entities += [
             cfg[CONF_SHADING_HYSTERESIS],
@@ -120,6 +117,38 @@ class CoverControlAdvancedController:
             return int(float(self._state(entity_id) or 0))
         except (ValueError, TypeError):
             return 0
+
+    def _normalize_direction(self, value: str) -> str:
+        normalized = (
+            value.strip()
+            .lower()
+            .replace("ä", "ae")
+            .replace("ö", "oe")
+            .replace("ü", "ue")
+            .replace("ß", "ss")
+        )
+
+        direction_map = {
+            "n": "n",
+            "north": "n",
+            "nord": "n",
+            "norden": "n",
+            "e": "e",
+            "east": "e",
+            "ost": "e",
+            "osten": "e",
+            "s": "s",
+            "south": "s",
+            "sud": "s",
+            "sued": "s",
+            "sueden": "s",
+            "sudlich": "s",
+            "suedlich": "s",
+            "w": "w",
+            "west": "w",
+            "westen": "w",
+        }
+        return direction_map.get(normalized, "")
 
     # -------------------------------------------------- computed properties
 
@@ -156,12 +185,12 @@ class CoverControlAdvancedController:
     @property
     def _shading_forced(self) -> bool:
         rs = self._rs.lower()
-        return "pc" not in rs and ("erzwungen" in rs or "forced" in rs)
+        return "erzwungen" in rs or "forced" in rs
 
     @property
     def _shading_automatic(self) -> bool:
         rs = self._rs.lower()
-        return "pc" not in rs and ("automatik" in rs or "automatic" in rs)
+        return "automatik" in rs or "automatic" in rs
 
     @property
     def _shading_manual(self) -> bool:
@@ -169,24 +198,29 @@ class CoverControlAdvancedController:
         return "manuell" in rs or "manual" in rs
 
     @property
-    def _pc_forced(self) -> bool:
-        rs = self._rs.lower()
-        return "pc" in rs and ("erzwungen" in rs or "forced" in rs)
-
-    @property
-    def _pc_automatic(self) -> bool:
-        rs = self._rs.lower()
-        return "pc" in rs and ("automatik" in rs or "automatic" in rs)
-
-    @property
     def _is_direction(self) -> bool:
-        d = self._cfg.get(CONF_DIRECTION, "")
-        return bool(d) and self._is_on(f"binary_sensor.richtung{d}")
+        direction = self._normalize_direction(
+            self._cfg.get(CONF_WINDOW_DIRECTION, "")
+        )
+        if not direction:
+            return False
 
-    @property
-    def _is_pc_direction(self) -> bool:
-        d = self._cfg.get(CONF_DIRECTION, "")
-        return bool(d) and self._is_on(f"binary_sensor.richtung{d}pc")
+        sun = self.hass.states.get("sun.sun")
+        if not sun:
+            return False
+
+        try:
+            azimuth = float(sun.attributes.get("azimuth")) % 360
+        except (TypeError, ValueError):
+            return False
+
+        if direction == "n":
+            return azimuth >= 315 or azimuth < 45
+        if direction == "e":
+            return 45 <= azimuth < 135
+        if direction == "s":
+            return 135 <= azimuth < 225
+        return 225 <= azimuth < 315
 
     @property
     def _event_on(self) -> bool:
@@ -247,19 +281,15 @@ class CoverControlAdvancedController:
             await self._close(cover)
             return
 
-        # 8. Day + shading active + direction/PC logic
+        # 8. Day + shading active + sun on selected window side
         window_or_closed_door = self._is_window or (not self._is_window and not self._is_window_open)
 
         shading = (
             (
                 self._hysteresis
-                and (
-                    (self._is_direction and self._shading_automatic)
-                    or (self._event_on and self._is_pc_direction and self._pc_automatic)
-                )
+                and (self._is_direction and self._shading_automatic)
             )
             or (self._is_direction and self._shading_forced)
-            or (self._event_on and self._is_pc_direction and self._pc_forced)
             or self._shading_manual
         )
 

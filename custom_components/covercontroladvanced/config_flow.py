@@ -7,11 +7,11 @@ from homeassistant.helpers import selector
 from .const import (
     CONF_COVER,
     CONF_DAY_NIGHT_MODE,
-    CONF_DIRECTION,
     CONF_EVENT_SWITCH,
     CONF_ROOM_SWITCH,
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
+    CONF_WINDOW_DIRECTION,
     CONF_WINDOW_ENTITIES,
     DOMAIN,
 )
@@ -26,7 +26,12 @@ _SCHEMA = vol.Schema(
                 domain="binary_sensor", device_class=["window", "door"], multiple=True
             )
         ),
-        vol.Optional(CONF_DIRECTION, default=""): selector.TextSelector(),
+        vol.Required(CONF_WINDOW_DIRECTION, default="south"): selector.SelectSelector(
+            selector.SelectSelectorConfig(
+                options=["north", "east", "south", "west"],
+                mode="dropdown",
+            )
+        ),
         vol.Required(CONF_ROOM_SWITCH): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_select")
         ),
@@ -58,7 +63,7 @@ _SCHEMA = vol.Schema(
 
 
 class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 1
+    VERSION = 2
 
     async def async_step_user(self, user_input=None):
         if user_input is not None:

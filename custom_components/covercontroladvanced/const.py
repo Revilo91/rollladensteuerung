@@ -2,7 +2,7 @@ DOMAIN = "covercontroladvanced"
 
 CONF_COVER = "cover_entity"
 CONF_WINDOW_ENTITIES = "window_entities"
-CONF_DIRECTION = "direction"
+CONF_WINDOW_DIRECTION = "window_direction"
 CONF_ROOM_SWITCH = "room_switch"
 CONF_SHADING_HYSTERESIS = "shading_hysteresis"
 CONF_DAY_NIGHT_MODE = "day_night_mode"

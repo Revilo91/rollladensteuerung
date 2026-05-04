@@ -7,12 +7,15 @@
         "data": {
           "cover_entity": "Cover entity",
           "window_entities": "Window / door contact sensors (binary_sensor)",
-          "direction": "Direction suffix for shading sensor (e.g. suden, westen)",
+          "window_direction": "Window orientation",
           "room_switch": "Room automation selector (input_select)",
           "shading_hysteresis": "Shading hysteresis sensor",
           "day_night_mode": "Day/night mode (input_boolean)",
           "shading_height": "Shading height (input_number)",
           "event_switch": "Event switch for shading events (optional)"
+        },
+        "data_description": {
+          "window_direction": "The integration uses sun position to detect whether sunlight hits this window side."
         }
       }
     },
