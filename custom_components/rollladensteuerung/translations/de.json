@@ -14,11 +14,7 @@
           "night_position": "Nachtbeschattungsposition (input_number)",
           "day_position": "Tagesbeschattungsposition (input_number)",
           "sleep_position": "Schlafbeschattungsposition (optional)",
-          "pc_switch": "PC-Schalter (optional)",
-          "cinema_switch": "Kino-Schalter (optional)",
-          "morning_open_switch": "Morgenöffnungs-Schalter (optional)",
-          "enable_morning_mode": "Morgenfunktion für diese Rolllade aktivieren?",
-          "enable_cinema_mode": "Kino-Funktion für diese Rolllade aktivieren?"
+          "event_switch": "Event-Schalter für Beschattungsereignisse (optional)"
         }
       }
     },

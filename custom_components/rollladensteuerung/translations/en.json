@@ -14,11 +14,7 @@
           "night_position": "Night shading position (input_number)",
           "day_position": "Day shading position (input_number)",
           "sleep_position": "Sleep shading position (optional)",
-          "pc_switch": "PC switch (optional)",
-          "cinema_switch": "Cinema switch (optional)",
-          "morning_open_switch": "Morning-open switch (optional)",
-          "enable_morning_mode": "Enable morning function for this cover?",
-          "enable_cinema_mode": "Enable cinema function for this cover?"
+          "event_switch": "Event switch for shading events (optional)"
         }
       }
     },

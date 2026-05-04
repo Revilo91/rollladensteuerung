@@ -8,7 +8,6 @@ from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.event import async_call_later, async_track_state_change_event
 
 from .const import (
-    CONF_CINEMA_SWITCH,
     CONF_COVER,
     CONF_DAY_NIGHT_MODE,
     CONF_DAY_POSITION,
@@ -104,7 +103,7 @@ class CoverControlAdvancedController:
             cfg[CONF_DAY_POSITION],
         ]
 
-        for key in (CONF_PC_SWITCH, CONF_CINEMA_SWITCH, CONF_MORNING_OPEN_SWITCH, CONF_SLEEP_POSITION):
+        for key in (CONF_EVENT_SWITCH, CONF_SLEEP_POSITION):
             if v := cfg.get(key):
                 entities.append(v)
 
@@ -193,8 +192,8 @@ class CoverControlAdvancedController:
         return bool(d) and self._is_on(f"binary_sensor.richtung{d}pc")
 
     @property
-    def _pc_on(self) -> bool:
-        return self._is_on(self._cfg.get(CONF_PC_SWITCH))
+    def _event_on(self) -> bool:
+        return self._is_on(self._cfg.get(CONF_EVENT_SWITCH))
 
     @property
     def _hysteresis(self) -> bool:
@@ -217,14 +216,13 @@ class CoverControlAdvancedController:
             await self._open(cover)
             return
 
-        # 3. Night + morning label + morning switch + shading active
+        # 3. Night + event switch + shading active
         if (
             not self._is_day
-            and self._cfg.get(CONF_ENABLE_MORNING_MODE)
-            and self._is_on(self._cfg.get(CONF_MORNING_OPEN_SWITCH))
+            and self._event_on
             and self._shading_active
         ):
-            self.last_reason = "Morning mode (night) → night position"
+            self.last_reason = "Night event switch → night position"
             await self._set_pos(cover, self._numeric(self._cfg[CONF_NIGHT_POSITION]))
             return
 
@@ -234,9 +232,9 @@ class CoverControlAdvancedController:
             await self._close(cover)
             return
 
-        # 5. Cinema mode
-        if self._is_on(self._cfg.get(CONF_CINEMA_SWITCH)) and self._cfg.get(CONF_ENABLE_CINEMA_MODE):
-            self.last_reason = "Cinema mode → close"
+        # 5. Event switch close mode
+        if self._event_on and ("kino" in self._rs.lower() or "cinema" in self._rs.lower()):
+            self.last_reason = "Cinema event switch → close"
             await self._close(cover)
             return
 
@@ -261,11 +259,11 @@ class CoverControlAdvancedController:
                 self._hysteresis
                 and (
                     (self._is_direction and self._shading_automatic)
-                    or (self._pc_on and self._is_pc_direction and self._pc_automatic)
+                    or (self._event_on and self._is_pc_direction and self._pc_automatic)
                 )
             )
             or (self._is_direction and self._shading_forced)
-            or (self._pc_on and self._is_pc_direction and self._pc_forced)
+            or (self._event_on and self._is_pc_direction and self._pc_forced)
             or self._shading_manual
         )
 

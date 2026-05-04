@@ -12,9 +12,8 @@ A Home Assistant custom integration for automated cover/shutter control – conf
   - Night/day shading with configurable positions
   - Window/door contact detection (multiple sensors per cover)
   - Direction-based shading (`binary_sensor.richtung<suffix>`)
-  - PC-based shading (separate direction logic)
-  - Cinema/movie-night mode
-  - Morning-open function
+  - Event-switch controlled shading events
+  - PC/cinema/morning handling via a shared event switch
   - Sleep and closed mode
   - Shading hysteresis with 4-minute off-delay
 - Diagnostic sensor per cover showing the last decision reason
@@ -50,20 +49,16 @@ Restart HA.
 | Night position | ✅ | `input_number.night_shading_position` |
 | Day position | ✅ | `input_number.day_shading_position` |
 | Sleep position | – | `input_number.sleep_shading_position` |
-| PC switch | – | `switch.buro_steckdose_*` or similar |
-| Cinema switch | – | `switch.cinema` |
-| Morning-open switch | – | `switch.morning_open` |
-| Morning function active | – | Boolean – enables the morning-open feature for this cover |
-| Cinema function active | – | Boolean – enables the cinema/movie-night feature for this cover |
+| Event switch | – | `switch.*` used as the shared trigger for shading events |
 
 ## Decision Logic (Priority)
 
 ```
 1. Night + window open             → Night position
 2. Door open (no window sensor)    → Open
-3. Night + morning mode active     → Night position
+3. Night + event switch active     → Night position
 4. Night + closed                  → Close
-5. Cinema mode active              → Close
+5. Cinema event switch active      → Close
 6. Day + sleep mode                → Sleep position
 7. Room = closed                   → Close
 8. Day + shading + direction       → Day position

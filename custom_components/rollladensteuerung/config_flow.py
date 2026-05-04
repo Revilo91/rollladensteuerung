@@ -4,16 +4,12 @@ from homeassistant import config_entries
 from homeassistant.helpers import selector
 
 from .const import (
-    CONF_CINEMA_SWITCH,
     CONF_COVER,
     CONF_DAY_NIGHT_MODE,
     CONF_DAY_POSITION,
     CONF_DIRECTION,
-    CONF_ENABLE_CINEMA_MODE,
-    CONF_ENABLE_MORNING_MODE,
-    CONF_MORNING_OPEN_SWITCH,
+    CONF_EVENT_SWITCH,
     CONF_NIGHT_POSITION,
-    CONF_PC_SWITCH,
     CONF_ROOM_SWITCH,
     CONF_SHADING_HYSTERESIS,
     CONF_SLEEP_POSITION,

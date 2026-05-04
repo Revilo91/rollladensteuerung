@@ -7,6 +7,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .const import (
     CONF_COVER,
     CONF_DIRECTION,
+    CONF_EVENT_SWITCH,
     CONF_ROOM_SWITCH,
     CONF_WINDOW_ENTITIES,
     DOMAIN,
@@ -43,6 +44,7 @@ class RollladenStatusSensor(SensorEntity):
         cfg = self._entry.data
         return {
             "cover": cfg.get(CONF_COVER),
+            "event_switch": cfg.get(CONF_EVENT_SWITCH),
             "room_switch": cfg.get(CONF_ROOM_SWITCH),
             "direction": cfg.get(CONF_DIRECTION),
             "window_entities": cfg.get(CONF_WINDOW_ENTITIES),
