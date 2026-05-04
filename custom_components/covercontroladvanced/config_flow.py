@@ -1,4 +1,4 @@
-"""Config flow for CoverControlAdvanced."""
+"""Config flow for Cover Control Advanced."""
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.helpers import selector
@@ -53,12 +53,12 @@ _SCHEMA = vol.Schema(
         ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_number")
         ),
-        vol.Optional(CONF_SLEEP_POSITION,default="20"): selector.EntitySelector(
+        vol.Optional(CONF_SLEEP_POSITION, default="20"): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_number")
         ),
         vol.Optional(CONF_EVENT_SWITCH): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="switch")
-        )
+        ),
     }
 )
 

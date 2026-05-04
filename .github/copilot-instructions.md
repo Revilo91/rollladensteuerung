@@ -1,35 +1,36 @@
-# Project Guidelines
+# Projekt-Richtlinien
 
-## Scope
+## Geltungsbereich
 
-- This repository is a Home Assistant custom integration with UI-based setup via config entries; do not introduce YAML-only configuration paths unless explicitly requested.
-- Keep changes focused on the integration under `custom_components/covercontroladvanced` and preserve Home Assistant conventions for config flows, entity setup, and async lifecycle methods.
+- Dieses Repository enthält eine Home-Assistant-Custom-Integration mit UI-basierter Einrichtung über Config Entries. Führe keine YAML-only-Konfiguration ein, außer wenn die Aufgabe das ausdrücklich verlangt.
+- Änderungen sollen sich auf die Integration unter `custom_components/covercontroladvanced` konzentrieren und die üblichen Home-Assistant-Muster für Config Flow, Entity-Setup und asynchronen Lebenszyklus beibehalten.
 
-## Python And Home Assistant Conventions
+## Python- und Home-Assistant-Konventionen
 
-- Prefer fully typed Python code and keep the existing simple module structure instead of introducing unnecessary abstractions.
-- Use Home Assistant async APIs end-to-end. Avoid blocking I/O, synchronous sleeps, or long-running work in entity and controller code.
-- Preserve the current setup pattern: controller state is created in `__init__.py`, stored in `hass.data[DOMAIN][entry.entry_id]`, and reused by the sensor platform.
-- Keep service calls and state tracking aligned with Home Assistant helpers such as `async_track_state_change_event`, `async_call_later`, and `hass.services.async_call`.
+- Bevorzuge vollständig typisiertes Python und halte die vorhandene, bewusst einfache Modulstruktur bei. Füge keine zusätzlichen Abstraktionsschichten ohne klaren Nutzen ein.
+- Nutze Home-Assistant-Async-APIs konsequent von Ende zu Ende. Kein blockierendes I/O, keine synchronen Sleeps und keine lang laufende Arbeit in Controller- oder Entity-Code.
+- Behalte das bestehende Setup-Muster bei: Der Controller wird in `__init__.py` erzeugt, unter `hass.data[DOMAIN][entry.entry_id]` gespeichert und in der Sensor-Plattform wiederverwendet.
+- Service-Aufrufe und Zustandsbeobachtung sollen sich an Home-Assistant-Helpern wie `async_track_state_change_event`, `async_call_later` und `hass.services.async_call` orientieren.
 
-## Integration-Specific Rules
+## Integrationsspezifische Regeln
 
-- Treat `config_flow.py`, `const.py`, `controller.py`, and `sensor.py` as the core contract of the integration. Changes to config keys in `const.py` must be reflected in config flow fields, runtime logic, and translations.
-- The diagnostic sensor exposes the controller decision reason. When changing decision logic, keep `last_reason` meaningful and user-readable.
-- This integration relies on Home Assistant entity IDs stored in the config entry. Do not replace them with hardcoded assumptions or derived values unless the user asks for a migration.
-- The current logic distinguishes between day/night, shading hysteresis, room modes, direction sensors, optional sleep position, and optional event switch. Preserve that behavior unless the task explicitly changes business rules.
+- Betrachte `config_flow.py`, `const.py`, `controller.py` und `sensor.py` als Kernvertrag der Integration. Änderungen an Konfigurationsschlüsseln in `const.py` müssen immer in Config Flow, Laufzeitlogik und Übersetzungen nachgezogen werden.
+- Der Diagnose-Sensor zeigt den Entscheidungsgrund des Controllers an. Wenn du die Entscheidungslogik änderst, muss `last_reason` weiterhin verständlich, kurz und für Nutzer lesbar bleiben.
+- Die Integration arbeitet mit in Config Entries gespeicherten Home-Assistant-Entity-IDs. Ersetze diese nicht durch harte Annahmen oder abgeleitete Werte, außer wenn die Aufgabe ausdrücklich eine Migration verlangt.
+- Die bestehende Logik unterscheidet Tag/Nacht, Beschattungshysterese, Raummodi, Richtungssensoren, optionale Schlafposition und optionalen Event-Schalter. Dieses Verhalten bleibt erhalten, solange die Aufgabe keine geänderten Fachregeln verlangt.
 
-## Naming Consistency
+## Kanonische Benennung
 
-- The repository currently contains mixed naming: folder `covercontroladvanced`, manifest and README text `CoverControlAdvanced`, and constant `DOMAIN = "cover_control_advanced"`.
-- Do not partially rename one of these identifiers. If a task requires renaming, update all affected touchpoints together, including manifest metadata, README, translations, sensor naming, and any generated entity identifiers.
+- Die technische Kennung der Integration ist `covercontroladvanced`. Dieser Wert muss für den Komponentenordner, den Manifest-Domain-Wert und die `DOMAIN`-Konstante konsistent bleiben.
+- Der sichtbare Produktname ist `Cover Control Advanced`. Verwende diesen Namen in README, HACS-Metadaten, Config-Flow-Texten und Entity-Namen.
+- Repository- und URL-Namen dürfen weiterhin `CoverControlAdvanced` verwenden. Vermische diese GitHub-Schreibweise aber nicht mit der technischen Integration-Domain.
 
-## Translations And Documentation
+## Übersetzungen und Dokumentation
 
-- Any user-facing config flow field, title, or abort message change must be mirrored in both translation files under `custom_components/covercontroladvanced/translations/`.
-- Keep README examples and terminology aligned with the actual integration behavior and installation path.
+- Jede nutzerseitige Änderung an Config-Flow-Feldern, Titeln oder Abort-Meldungen muss in beiden Übersetzungsdateien unter `custom_components/covercontroladvanced/translations/` gespiegelt werden.
+- README-Beispiele, Installationspfade und Begriffe müssen zum tatsächlichen Integrationsordner und zur aktuellen Laufzeitlogik passen.
 
-## Validation
+## Validierung
 
-- Before finishing substantial Python changes, run `ruff check custom_components/`.
-- When changes affect manifest, structure, translations, or Home Assistant integration metadata, also consider the repository CI expectations from `.github/workflows/validate.yml`: HACS validation and Hassfest.
+- Führe nach substanziellen Python-Änderungen `ruff check custom_components/` aus.
+- Wenn Änderungen Manifest, Struktur, Übersetzungen oder Home-Assistant-Metadaten betreffen, berücksichtige zusätzlich die CI-Erwartungen aus `.github/workflows/validate.yml`, insbesondere HACS-Validation und Hassfest.

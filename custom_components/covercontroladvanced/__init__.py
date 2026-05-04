@@ -1,4 +1,4 @@
-"""CoverControlAdvanced – Home Assistant custom integration."""
+"""Cover Control Advanced - Home Assistant custom integration."""
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
@@ -11,7 +11,7 @@ PLATFORMS = ["sensor"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up a CoverControlAdvanced instance from a config entry."""
+    """Set up a Cover Control Advanced instance from a config entry."""
     controller = CoverControlAdvancedController(hass, entry)
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = controller
     await controller.async_setup()

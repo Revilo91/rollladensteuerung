@@ -21,10 +21,10 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     ctrl: CoverControlAdvancedController = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([RollladenStatusSensor(entry, ctrl)])
+    async_add_entities([CoverControlAdvancedStatusSensor(entry, ctrl)])
 
 
-class RollladenStatusSensor(SensorEntity):
+class CoverControlAdvancedStatusSensor(SensorEntity):
     _attr_icon = "mdi:roller-shade"
     _attr_should_poll = False
 
@@ -33,7 +33,7 @@ class RollladenStatusSensor(SensorEntity):
         self._ctrl = ctrl
         cover = entry.data[CONF_COVER]
         self._attr_unique_id = f"{DOMAIN}_{cover}_status"
-        self._attr_name = f"Cover Control {cover}"
+        self._attr_name = f"Cover Control Advanced {cover}"
 
     @property
     def native_value(self) -> str:

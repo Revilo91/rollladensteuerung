@@ -1,6 +1,6 @@
 {
-  "domain": "CoverControlAdvanced",
-  "name": "Cover Control",
+  "domain": "covercontroladvanced",
+  "name": "Cover Control Advanced",
   "codeowners": ["@revilo91"],
   "config_flow": true,
   "dependencies": [],

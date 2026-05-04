@@ -1,4 +1,4 @@
-# CoverControlAdvanced
+# Cover Control Advanced
 
 [![HACS Custom][hacs-badge]][hacs-url]
 [![Validate][validate-badge]][validate-url]
@@ -28,8 +28,8 @@ A Home Assistant custom integration for automated cover/shutter control – conf
 ## Manual Installation
 
 ```bash
-cp -r custom_components/CoverControlAdvanced \
-      /config/custom_components/CoverControlAdvanced
+cp -r custom_components/covercontroladvanced \
+  /config/custom_components/covercontroladvanced
 ```
 
 Restart HA.
@@ -67,7 +67,7 @@ Restart HA.
 
 ## Diagnostic Sensor
 
-Each instance creates a sensor `sensor.CoverControlAdvanced_<cover>` with the last decision reason as its `state`.
+Each instance creates a diagnostic sensor for the configured cover and exposes the last decision reason as its `state`.
 
 [hacs-badge]: https://img.shields.io/badge/HACS-Custom-orange.svg
 [hacs-url]: https://hacs.xyz

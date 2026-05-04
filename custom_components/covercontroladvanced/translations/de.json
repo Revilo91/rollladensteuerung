@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "Rollladensteuerung einrichten",
-        "description": "Konfiguriere einen gesteuerten Rollladen.",
+        "title": "Cover Control Advanced einrichten",
+        "description": "Konfiguriere einen automatisch gesteuerten Rollladen.",
         "data": {
           "cover_entity": "Rolllade (Cover-Entität)",
           "window_entities": "Fenster- / Türkontakte (binary_sensor)",

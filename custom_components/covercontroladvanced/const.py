@@ -1,4 +1,4 @@
-DOMAIN = "cover_control_advanced"
+DOMAIN = "covercontroladvanced"
 
 CONF_COVER = "cover_entity"
 CONF_WINDOW_ENTITIES = "window_entities"
