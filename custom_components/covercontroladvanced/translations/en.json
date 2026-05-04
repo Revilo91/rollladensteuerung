@@ -7,8 +7,8 @@
         "data": {
           "cover_entity": "Cover entity",
           "window_entities": "Window / door contact sensors (binary_sensor)",
-          "window_azimuth": "Window orientation (azimuth in degrees)",
-          "sun_azimuth_tolerance": "Tolerance to window orientation (degrees)",
+          "sun_azimuth_start": "Sun azimuth start (degrees)",
+          "sun_azimuth_end": "Sun azimuth end (degrees)",
           "room_switch": "Room automation selector (input_select)",
           "shading_hysteresis": "Shading hysteresis sensor",
           "day_night_mode": "Day/night mode (input_boolean)",
@@ -16,8 +16,8 @@
           "event_switch": "Event switch for shading events (optional)"
         },
         "data_description": {
-          "window_azimuth": "0=north, 90=east, 180=south, 270=west. Configure individually per window/cover.",
-          "sun_azimuth_tolerance": "Shading is active when sun azimuth is within +/- tolerance of the window orientation."
+          "sun_azimuth_start": "Start angle of the sun azimuth window (0-359).",
+          "sun_azimuth_end": "End angle of the sun azimuth window (0-359). If start > end, the range wraps over 0 degrees (e.g. 330 to 30)."
         }
       }
     },

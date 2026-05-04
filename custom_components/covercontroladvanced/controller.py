@@ -14,8 +14,8 @@ from .const import (
     CONF_ROOM_SWITCH,
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
-    CONF_SUN_AZIMUTH_TOLERANCE,
-    CONF_WINDOW_AZIMUTH,
+    CONF_SUN_AZIMUTH_END,
+    CONF_SUN_AZIMUTH_START,
     CONF_WINDOW_ENTITIES,
     SHADING_OFF_DELAY,
 )
@@ -118,21 +118,17 @@ class CoverControlAdvancedController:
         except (ValueError, TypeError):
             return 0
 
-    def _window_azimuth(self) -> float:
+    def _sun_azimuth_start(self) -> float:
         try:
-            return float(self._cfg.get(CONF_WINDOW_AZIMUTH, 180)) % 360
+            return float(self._cfg.get(CONF_SUN_AZIMUTH_START, 135)) % 360
         except (TypeError, ValueError):
-            return 180.0
+            return 135.0
 
-    def _sun_tolerance(self) -> float:
+    def _sun_azimuth_end(self) -> float:
         try:
-            tolerance = float(self._cfg.get(CONF_SUN_AZIMUTH_TOLERANCE, 45))
+            return float(self._cfg.get(CONF_SUN_AZIMUTH_END, 225)) % 360
         except (TypeError, ValueError):
-            tolerance = 45.0
-        return max(5.0, min(90.0, tolerance))
-
-    def _azimuth_distance(self, a: float, b: float) -> float:
-        return abs((a - b + 180.0) % 360.0 - 180.0)
+            return 225.0
 
     # -------------------------------------------------- computed properties
 
@@ -191,7 +187,13 @@ class CoverControlAdvancedController:
             azimuth = float(sun.attributes.get("azimuth")) % 360
         except (TypeError, ValueError):
             return False
-        return self._azimuth_distance(azimuth, self._window_azimuth()) <= self._sun_tolerance()
+
+        start = self._sun_azimuth_start()
+        end = self._sun_azimuth_end()
+
+        if start <= end:
+            return start <= azimuth <= end
+        return azimuth >= start or azimuth <= end
 
     @property
     def _event_on(self) -> bool:

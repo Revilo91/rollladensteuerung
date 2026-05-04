@@ -7,7 +7,7 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import CONF_SUN_AZIMUTH_TOLERANCE, CONF_WINDOW_AZIMUTH, DOMAIN
+from .const import CONF_SUN_AZIMUTH_END, CONF_SUN_AZIMUTH_START, DOMAIN
 from .controller import CoverControlAdvancedController
 
 PLATFORMS = ["sensor"]
@@ -57,22 +57,34 @@ def _direction_to_azimuth(value: str | None) -> int:
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate old config entries to the current schema."""
-    if entry.version >= 3:
+    if entry.version >= 4:
         return True
 
     data = dict(entry.data)
-    if CONF_WINDOW_AZIMUTH not in data:
-        if "window_direction" in data:
-            data[CONF_WINDOW_AZIMUTH] = _direction_to_azimuth(data.get("window_direction"))
-        else:
-            data[CONF_WINDOW_AZIMUTH] = _direction_to_azimuth(data.get("direction"))
 
-    if CONF_SUN_AZIMUTH_TOLERANCE not in data:
-        data[CONF_SUN_AZIMUTH_TOLERANCE] = 45
+    if "window_azimuth" not in data:
+        if "window_direction" in data:
+            data["window_azimuth"] = _direction_to_azimuth(data.get("window_direction"))
+        else:
+            data["window_azimuth"] = _direction_to_azimuth(data.get("direction"))
+
+    if "sun_azimuth_tolerance" not in data:
+        data["sun_azimuth_tolerance"] = 45
+
+    azimuth = float(data.get("window_azimuth", 180)) % 360
+    tolerance = float(data.get("sun_azimuth_tolerance", 45))
+    tolerance = max(5.0, min(90.0, tolerance))
+
+    if CONF_SUN_AZIMUTH_START not in data:
+        data[CONF_SUN_AZIMUTH_START] = int((azimuth - tolerance) % 360)
+    if CONF_SUN_AZIMUTH_END not in data:
+        data[CONF_SUN_AZIMUTH_END] = int((azimuth + tolerance) % 360)
 
     data.pop("direction", None)
     data.pop("window_direction", None)
+    data.pop("window_azimuth", None)
+    data.pop("sun_azimuth_tolerance", None)
 
-    hass.config_entries.async_update_entry(entry, data=data, version=3)
-    _LOGGER.debug("Migrated config entry %s to version 3", entry.entry_id)
+    hass.config_entries.async_update_entry(entry, data=data, version=4)
+    _LOGGER.debug("Migrated config entry %s to version 4", entry.entry_id)
     return True
