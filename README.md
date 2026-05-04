@@ -1,4 +1,4 @@
-# Cover Control (rollladensteuerung)
+# Cover Control Advanced
 
 [![HACS Custom][hacs-badge]][hacs-url]
 [![Validate][validate-badge]][validate-url]
