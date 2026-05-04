@@ -46,22 +46,20 @@ Restart HA.
 | Room automation | ✅ | `input_select.*` with values like `Automatic`, `Forced`, `Inactive`, `Manual`, `PC Automatic`, `PC Forced`, `Sleep`, `Closed` |
 | Shading hysteresis | ✅ | `binary_sensor.shading_hysteresis` |
 | Day/night mode | ✅ | `input_boolean.day_night_mode` |
-| Night position | ✅ | `input_number.night_shading_position` |
-| Day position | ✅ | `input_number.day_shading_position` |
-| Sleep position | – | `input_number.sleep_shading_position` |
+| Shading height | ✅ | `input_number.*` used as the single target position |
 | Event switch | – | `switch.*` used as the shared trigger for shading events |
 
 ## Decision Logic (Priority)
 
 ```
-1. Night + window open             → Night position
+1. Night + window open             → Shading height
 2. Door open (no window sensor)    → Open
-3. Night + event switch active     → Night position
+3. Night + event switch active     → Shading height
 4. Night + closed                  → Close
 5. Cinema event switch active      → Close
-6. Day + sleep mode                → Sleep position
+6. Day + sleep mode                → Shading height
 7. Room = closed                   → Close
-8. Day + shading + direction       → Day position
+8. Day + shading + direction       → Shading height
 9. Default                         → Day: Open / Night: Close
 ```
 

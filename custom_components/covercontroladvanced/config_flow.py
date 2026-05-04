@@ -1,4 +1,5 @@
 """Config flow for Cover Control Advanced."""
+
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.helpers import selector
@@ -6,13 +7,11 @@ from homeassistant.helpers import selector
 from .const import (
     CONF_COVER,
     CONF_DAY_NIGHT_MODE,
-    CONF_DAY_POSITION,
     CONF_DIRECTION,
     CONF_EVENT_SWITCH,
-    CONF_NIGHT_POSITION,
     CONF_ROOM_SWITCH,
+    CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
-    CONF_SLEEP_POSITION,
     CONF_WINDOW_ENTITIES,
     DOMAIN,
 )
@@ -23,7 +22,9 @@ _SCHEMA = vol.Schema(
             selector.EntitySelectorConfig(domain="cover")
         ),
         vol.Optional(CONF_WINDOW_ENTITIES, default=[]): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="binary_sensor", multiple=True)
+            selector.EntitySelectorConfig(
+                domain="binary_sensor", device_class=["window", "door"], multiple=True
+            )
         ),
         vol.Optional(CONF_DIRECTION, default=""): selector.TextSelector(),
         vol.Required(CONF_ROOM_SWITCH): selector.EntitySelector(
@@ -33,7 +34,9 @@ _SCHEMA = vol.Schema(
             CONF_SHADING_HYSTERESIS,
             default="",
         ): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="binary_sensor", device_class="light")
+            selector.EntitySelectorConfig(
+                domain="binary_sensor", device_class=["light"]
+            )
         ),
         vol.Required(
             CONF_DAY_NIGHT_MODE,
@@ -42,18 +45,9 @@ _SCHEMA = vol.Schema(
             selector.EntitySelectorConfig(domain="input_boolean")
         ),
         vol.Required(
-            CONF_NIGHT_POSITION,
-            default="20",
+            CONF_SHADING_HEIGHT,
+            default="20", min=0, max=100, step=1, unit_of_measurement="%", mode="box"
         ): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="input_number")
-        ),
-        vol.Required(
-            CONF_DAY_POSITION,
-            default="20",
-        ): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="input_number")
-        ),
-        vol.Optional(CONF_SLEEP_POSITION, default="20"): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_number")
         ),
         vol.Optional(CONF_EVENT_SWITCH): selector.EntitySelector(
@@ -64,7 +58,7 @@ _SCHEMA = vol.Schema(
 
 
 class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 2
+    VERSION = 3
 
     async def async_step_user(self, user_input=None):
         if user_input is not None:

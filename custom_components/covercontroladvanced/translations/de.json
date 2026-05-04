@@ -11,9 +11,7 @@
           "room_switch": "Raumautomationsauswahl (input_select)",
           "shading_hysteresis": "Beschattungshysterese-Sensor",
           "day_night_mode": "Tag/Nacht-Modus (input_boolean)",
-          "night_position": "Nachtbeschattungsposition (input_number)",
-          "day_position": "Tagesbeschattungsposition (input_number)",
-          "sleep_position": "Schlafbeschattungsposition (optional)",
+          "shading_height": "Beschattungshöhe (input_number)",
           "event_switch": "Event-Schalter für Beschattungsereignisse (optional)"
         }
       }
