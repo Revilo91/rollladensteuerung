@@ -1,4 +1,4 @@
-# Cover Control Advanced
+# CoverControlAdvanced
 
 [![HACS Custom][hacs-badge]][hacs-url]
 [![Validate][validate-badge]][validate-url]
@@ -22,15 +22,15 @@ A Home Assistant custom integration for automated cover/shutter control – conf
 ## Installation via HACS
 
 1. HACS → Integrations → ⋮ → Custom Repositories
-2. URL: `https://github.com/revilo91/rollladensteuerung`
+2. URL: `https://github.com/revilo91/CoverControlAdvanced`
 3. Category: `Integration`
 4. Add repository, then install
 
 ## Manual Installation
 
 ```bash
-cp -r custom_components/rollladensteuerung \
-      /config/custom_components/rollladensteuerung
+cp -r custom_components/CoverControlAdvanced \
+      /config/custom_components/CoverControlAdvanced
 ```
 
 Restart HA.
@@ -72,9 +72,9 @@ Restart HA.
 
 ## Diagnostic Sensor
 
-Each instance creates a sensor `sensor.rollladensteuerung_<cover>` with the last decision reason as its `state`.
+Each instance creates a sensor `sensor.CoverControlAdvanced_<cover>` with the last decision reason as its `state`.
 
 [hacs-badge]: https://img.shields.io/badge/HACS-Custom-orange.svg
 [hacs-url]: https://hacs.xyz
-[validate-badge]: https://github.com/revilo91/rollladensteuerung/actions/workflows/validate.yml/badge.svg
-[validate-url]: https://github.com/revilo91/rollladensteuerung/actions/workflows/validate.yml
+[validate-badge]: https://github.com/revilo91/CoverControlAdvanced/actions/workflows/validate.yml/badge.svg
+[validate-url]: https://github.com/revilo91/CoverControlAdvanced/actions/workflows/validate.yml

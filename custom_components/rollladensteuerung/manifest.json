@@ -1,13 +1,13 @@
 {
-  "domain": "rollladensteuerung",
+  "domain": "CoverControlAdvanced",
   "name": "Cover Control",
   "codeowners": ["@revilo91"],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/revilo91/rollladensteuerung",
+  "documentation": "https://github.com/revilo91/CoverControlAdvanced",
   "integration_type": "hub",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/revilo91/rollladensteuerung/issues",
+  "issue_tracker": "https://github.com/revilo91/CoverControlAdvanced/issues",
   "requirements": [],
   "version": "1.0.0"
 }

@@ -1,4 +1,4 @@
-"""Config flow for Rollladensteuerung."""
+"""Config flow for CoverControlAdvanced."""
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.helpers import selector
@@ -35,47 +35,39 @@ _SCHEMA = vol.Schema(
         ),
         vol.Required(
             CONF_SHADING_HYSTERESIS,
-            default="binary_sensor.shading_hysteresis",
+            default="",
         ): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="binary_sensor")
+            selector.EntitySelectorConfig(domain="binary_sensor", device_class="light")
         ),
         vol.Required(
             CONF_DAY_NIGHT_MODE,
-            default="input_boolean.day_night_mode",
+            default="",
         ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_boolean")
         ),
         vol.Required(
             CONF_NIGHT_POSITION,
-            default="input_number.night_shading_position",
+            default="20",
         ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_number")
         ),
         vol.Required(
             CONF_DAY_POSITION,
-            default="input_number.day_shading_position",
+            default="20",
         ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_number")
         ),
-        vol.Optional(CONF_SLEEP_POSITION): selector.EntitySelector(
+        vol.Optional(CONF_SLEEP_POSITION,default="20"): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_number")
         ),
-        vol.Optional(CONF_PC_SWITCH): selector.EntitySelector(
+        vol.Optional(CONF_EVENT_SWITCH): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="switch")
-        ),
-        vol.Optional(CONF_CINEMA_SWITCH): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="switch")
-        ),
-        vol.Optional(CONF_MORNING_OPEN_SWITCH): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="switch")
-        ),
-        vol.Optional(CONF_ENABLE_MORNING_MODE, default=False): selector.BooleanSelector(),
-        vol.Optional(CONF_ENABLE_CINEMA_MODE, default=False): selector.BooleanSelector(),
+        )
     }
 )
 
 
-class RollladensteuerungConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 2
 
     async def async_step_user(self, user_input=None):

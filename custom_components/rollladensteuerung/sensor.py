@@ -11,7 +11,7 @@ from .const import (
     CONF_WINDOW_ENTITIES,
     DOMAIN,
 )
-from .controller import RollladenController
+from .controller import CoverControlAdvancedController
 
 
 async def async_setup_entry(
@@ -19,7 +19,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    ctrl: RollladenController = hass.data[DOMAIN][entry.entry_id]
+    ctrl: CoverControlAdvancedController = hass.data[DOMAIN][entry.entry_id]
     async_add_entities([RollladenStatusSensor(entry, ctrl)])
 
 
@@ -27,7 +27,7 @@ class RollladenStatusSensor(SensorEntity):
     _attr_icon = "mdi:roller-shade"
     _attr_should_poll = False
 
-    def __init__(self, entry: ConfigEntry, ctrl: RollladenController) -> None:
+    def __init__(self, entry: ConfigEntry, ctrl: CoverControlAdvancedController) -> None:
         self._entry = entry
         self._ctrl = ctrl
         cover = entry.data[CONF_COVER]

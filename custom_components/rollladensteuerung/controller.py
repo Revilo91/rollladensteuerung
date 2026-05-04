@@ -13,11 +13,8 @@ from .const import (
     CONF_DAY_NIGHT_MODE,
     CONF_DAY_POSITION,
     CONF_DIRECTION,
-    CONF_ENABLE_CINEMA_MODE,
-    CONF_ENABLE_MORNING_MODE,
-    CONF_MORNING_OPEN_SWITCH,
+    CONF_EVENT_SWITCH,
     CONF_NIGHT_POSITION,
-    CONF_PC_SWITCH,
     CONF_ROOM_SWITCH,
     CONF_SHADING_HYSTERESIS,
     CONF_SLEEP_POSITION,
@@ -28,7 +25,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class RollladenController:
+class CoverControlAdvancedController:
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
         self.hass = hass
         self._cfg = entry.data
@@ -74,7 +71,7 @@ class RollladenController:
             async_track_state_change_event(self.hass, watch, _on_state_change)
         )
         _LOGGER.debug(
-            "RollladenController for %s started, watching: %s",
+            "CoverControlAdvancedController for %s started, watching: %s",
             self._cfg[CONF_COVER],
             watch,
         )
