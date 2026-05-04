@@ -8,7 +8,8 @@ from .const import (
     CONF_COVER,
     CONF_EVENT_SWITCH,
     CONF_ROOM_SWITCH,
-    CONF_WINDOW_DIRECTION,
+    CONF_SUN_AZIMUTH_TOLERANCE,
+    CONF_WINDOW_AZIMUTH,
     CONF_WINDOW_ENTITIES,
     DOMAIN,
 )
@@ -46,6 +47,7 @@ class CoverControlAdvancedStatusSensor(SensorEntity):
             "cover": cfg.get(CONF_COVER),
             "event_switch": cfg.get(CONF_EVENT_SWITCH),
             "room_switch": cfg.get(CONF_ROOM_SWITCH),
-            "window_direction": cfg.get(CONF_WINDOW_DIRECTION),
+            "window_azimuth": cfg.get(CONF_WINDOW_AZIMUTH),
+            "sun_azimuth_tolerance": cfg.get(CONF_SUN_AZIMUTH_TOLERANCE),
             "window_entities": cfg.get(CONF_WINDOW_ENTITIES),
         }

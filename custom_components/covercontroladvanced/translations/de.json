@@ -7,7 +7,8 @@
         "data": {
           "cover_entity": "Rolllade (Cover-Entität)",
           "window_entities": "Fenster- / Türkontakte (binary_sensor)",
-          "window_direction": "Fensterausrichtung",
+          "window_azimuth": "Fensterausrichtung (Azimut in Grad)",
+          "sun_azimuth_tolerance": "Toleranz zur Fensterausrichtung (Grad)",
           "room_switch": "Raumautomationsauswahl (input_select)",
           "shading_hysteresis": "Beschattungshysterese-Sensor",
           "day_night_mode": "Tag/Nacht-Modus (input_boolean)",
@@ -15,7 +16,8 @@
           "event_switch": "Event-Schalter für Beschattungsereignisse (optional)"
         },
         "data_description": {
-          "window_direction": "Die Integration nutzt den Sonnenstand, um zu erkennen, ob die Sonne auf diese Fensterseite trifft."
+          "window_azimuth": "0=Norden, 90=Osten, 180=Süden, 270=Westen. Individuell pro Fenster/Cover konfigurierbar.",
+          "sun_azimuth_tolerance": "Beschattung aktiv, wenn der Sonnen-Azimut innerhalb von +/- Toleranz zur Fensterausrichtung liegt."
         }
       }
     },

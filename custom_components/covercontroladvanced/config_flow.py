@@ -11,7 +11,8 @@ from .const import (
     CONF_ROOM_SWITCH,
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
-    CONF_WINDOW_DIRECTION,
+    CONF_SUN_AZIMUTH_TOLERANCE,
+    CONF_WINDOW_AZIMUTH,
     CONF_WINDOW_ENTITIES,
     DOMAIN,
 )
@@ -26,10 +27,22 @@ _SCHEMA = vol.Schema(
                 domain="binary_sensor", device_class=["window", "door"], multiple=True
             )
         ),
-        vol.Required(CONF_WINDOW_DIRECTION, default="south"): selector.SelectSelector(
-            selector.SelectSelectorConfig(
-                options=["north", "east", "south", "west"],
-                mode="dropdown",
+        vol.Required(CONF_WINDOW_AZIMUTH, default=180): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0,
+                max=359,
+                step=1,
+                unit_of_measurement="°",
+                mode=selector.NumberSelectorMode.BOX,
+            )
+        ),
+        vol.Optional(CONF_SUN_AZIMUTH_TOLERANCE, default=45): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=5,
+                max=90,
+                step=1,
+                unit_of_measurement="°",
+                mode=selector.NumberSelectorMode.BOX,
             )
         ),
         vol.Required(CONF_ROOM_SWITCH): selector.EntitySelector(
@@ -63,7 +76,7 @@ _SCHEMA = vol.Schema(
 
 
 class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 2
+    VERSION = 3
 
     async def async_step_user(self, user_input=None):
         if user_input is not None:

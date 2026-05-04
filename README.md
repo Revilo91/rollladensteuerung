@@ -11,7 +11,7 @@ A Home Assistant custom integration for automated cover/shutter control – conf
 - Full shading logic in Python:
   - Night/day shading with configurable positions
   - Window/door contact detection (multiple sensors per cover)
-  - Sun-position based shading via configured window orientation (north/east/south/west)
+  - Sun-position based shading via configured window azimuth (degrees)
   - Event-switch controlled shading events
   - Cinema/event handling via a shared event switch
   - Sleep and closed mode
@@ -42,7 +42,8 @@ Restart HA.
 |---|---|---|
 | Cover entity | ✅ | The `cover.*` entity to control |
 | Window/door contacts | – | Multiple `binary_sensor.*` supported |
-| Window orientation | ✅ | `north`, `east`, `south`, or `west` |
+| Window orientation (azimuth) | ✅ | `0..359` degrees (`0=N`, `90=E`, `180=S`, `270=W`) |
+| Sun tolerance | – | `5..90` degrees around the configured window azimuth |
 | Room automation | ✅ | `input_select.*` with values like `Automatic`, `Forced`, `Inactive`, `Manual`, `Sleep`, `Closed` |
 | Shading hysteresis | ✅ | `binary_sensor.shading_hysteresis` |
 | Day/night mode | ✅ | `input_boolean.day_night_mode` |

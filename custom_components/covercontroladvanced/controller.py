@@ -14,7 +14,8 @@ from .const import (
     CONF_ROOM_SWITCH,
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
-    CONF_WINDOW_DIRECTION,
+    CONF_SUN_AZIMUTH_TOLERANCE,
+    CONF_WINDOW_AZIMUTH,
     CONF_WINDOW_ENTITIES,
     SHADING_OFF_DELAY,
 )
@@ -87,8 +88,7 @@ class CoverControlAdvancedController:
 
         entities.extend(cfg.get(CONF_WINDOW_ENTITIES) or [])
 
-        if cfg.get(CONF_WINDOW_DIRECTION, ""):
-            entities.append("sun.sun")
+        entities.append("sun.sun")
 
         entities += [
             cfg[CONF_SHADING_HYSTERESIS],
@@ -118,37 +118,21 @@ class CoverControlAdvancedController:
         except (ValueError, TypeError):
             return 0
 
-    def _normalize_direction(self, value: str) -> str:
-        normalized = (
-            value.strip()
-            .lower()
-            .replace("ä", "ae")
-            .replace("ö", "oe")
-            .replace("ü", "ue")
-            .replace("ß", "ss")
-        )
+    def _window_azimuth(self) -> float:
+        try:
+            return float(self._cfg.get(CONF_WINDOW_AZIMUTH, 180)) % 360
+        except (TypeError, ValueError):
+            return 180.0
 
-        direction_map = {
-            "n": "n",
-            "north": "n",
-            "nord": "n",
-            "norden": "n",
-            "e": "e",
-            "east": "e",
-            "ost": "e",
-            "osten": "e",
-            "s": "s",
-            "south": "s",
-            "sud": "s",
-            "sued": "s",
-            "sueden": "s",
-            "sudlich": "s",
-            "suedlich": "s",
-            "w": "w",
-            "west": "w",
-            "westen": "w",
-        }
-        return direction_map.get(normalized, "")
+    def _sun_tolerance(self) -> float:
+        try:
+            tolerance = float(self._cfg.get(CONF_SUN_AZIMUTH_TOLERANCE, 45))
+        except (TypeError, ValueError):
+            tolerance = 45.0
+        return max(5.0, min(90.0, tolerance))
+
+    def _azimuth_distance(self, a: float, b: float) -> float:
+        return abs((a - b + 180.0) % 360.0 - 180.0)
 
     # -------------------------------------------------- computed properties
 
@@ -198,13 +182,7 @@ class CoverControlAdvancedController:
         return "manuell" in rs or "manual" in rs
 
     @property
-    def _is_direction(self) -> bool:
-        direction = self._normalize_direction(
-            self._cfg.get(CONF_WINDOW_DIRECTION, "")
-        )
-        if not direction:
-            return False
-
+    def _is_sun_on_window(self) -> bool:
         sun = self.hass.states.get("sun.sun")
         if not sun:
             return False
@@ -213,14 +191,7 @@ class CoverControlAdvancedController:
             azimuth = float(sun.attributes.get("azimuth")) % 360
         except (TypeError, ValueError):
             return False
-
-        if direction == "n":
-            return azimuth >= 315 or azimuth < 45
-        if direction == "e":
-            return 45 <= azimuth < 135
-        if direction == "s":
-            return 135 <= azimuth < 225
-        return 225 <= azimuth < 315
+        return self._azimuth_distance(azimuth, self._window_azimuth()) <= self._sun_tolerance()
 
     @property
     def _event_on(self) -> bool:
@@ -281,15 +252,15 @@ class CoverControlAdvancedController:
             await self._close(cover)
             return
 
-        # 8. Day + shading active + sun on selected window side
+        # 8. Day + shading active + sun on configured azimuth
         window_or_closed_door = self._is_window or (not self._is_window and not self._is_window_open)
 
         shading = (
             (
                 self._hysteresis
-                and (self._is_direction and self._shading_automatic)
+                and (self._is_sun_on_window and self._shading_automatic)
             )
-            or (self._is_direction and self._shading_forced)
+            or (self._is_sun_on_window and self._shading_forced)
             or self._shading_manual
         )
 
