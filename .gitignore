@@ -3,6 +3,7 @@ __pycache__/
 *.pyo
 .env
 .venv
+.hass_dev/
 dist/
 *.egg-info/
 .ruff_cache/
