@@ -1,4 +1,6 @@
 """Diagnostic sensor – shows the last decision reason per cover."""
+from collections.abc import Callable
+
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -33,7 +35,7 @@ async def async_setup_entry(
 
 
 class CoverControlAdvancedStatusSensor(SensorEntity):
-    _attr_icon = "mdi:roller-shade"
+    _attr_icon = "mdi:window-shutter-open"
     _attr_should_poll = False
     _attr_device_class = SensorDeviceClass.ENUM
     _attr_translation_key = "status"
@@ -59,10 +61,21 @@ class CoverControlAdvancedStatusSensor(SensorEntity):
         self._entry = entry
         self._ctrl = ctrl
         self._cover_cfg = cover_cfg
+        self._unsubscribe_update: Callable[[], None] | None = None
         cover = cover_cfg[CONF_COVER]
         room_name = entry.data.get(CONF_ROOM_NAME, cover)
-        self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_{cover}_status"
+        self._attr_unique_id = f"{room_name}_{cover}_status"
         self._attr_name = f"Cover Control Advanced {room_name} {cover}"
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self._unsubscribe_update = self._ctrl.async_add_listener(self.async_write_ha_state)
+
+    async def async_will_remove_from_hass(self) -> None:
+        if self._unsubscribe_update is not None:
+            self._unsubscribe_update()
+            self._unsubscribe_update = None
+        await super().async_will_remove_from_hass()
 
     @property
     def native_value(self) -> str:

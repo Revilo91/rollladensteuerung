@@ -15,7 +15,7 @@
       },
       "cover": {
         "title": "Configure Cover",
-        "description": "Add the first cover to this room.",
+        "description": "Add a cover to this room.",
         "data": {
           "cover_entity": "Cover entity",
           "window_entities": "Window / door contact sensors (binary_sensor)",
@@ -26,10 +26,50 @@
           "sun_azimuth_start": "Start angle of the sun azimuth window (0-359).",
           "sun_azimuth_end": "End angle of the sun azimuth window (0-359). If start > end, the range wraps over 0 degrees (e.g. 330 to 30)."
         }
+      },
+      "add_more": {
+        "title": "Add another cover?",
+        "description": "You can add more covers to this room or finish the setup.",
+        "menu_options": {
+          "cover": "Add another cover",
+          "finish": "Finish setup"
+        }
       }
+    },
+    "error": {
+      "cover_already_added": "This cover has already been added to the room."
     },
     "abort": {
       "already_configured": "This room is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "cover": {
+        "title": "Add Cover",
+        "description": "Add another cover to this room.",
+        "data": {
+          "cover_entity": "Cover entity",
+          "window_entities": "Window / door contact sensors (binary_sensor)",
+          "sun_azimuth_start": "Sun azimuth start (degrees)",
+          "sun_azimuth_end": "Sun azimuth end (degrees)"
+        },
+        "data_description": {
+          "sun_azimuth_start": "Start angle of the sun azimuth window (0-359).",
+          "sun_azimuth_end": "End angle of the sun azimuth window (0-359). If start > end, the range wraps over 0 degrees (e.g. 330 to 30)."
+        }
+      },
+      "add_more": {
+        "title": "Add another cover?",
+        "description": "You can add more covers to this room or finish.",
+        "menu_options": {
+          "cover": "Add another cover",
+          "finish": "Finish"
+        }
+      }
+    },
+    "error": {
+      "cover_already_added": "This cover has already been added to the room."
     }
   },
   "entity": {

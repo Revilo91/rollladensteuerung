@@ -6,6 +6,7 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import area_registry
 
 from .const import (
     CONF_COVER,
@@ -28,6 +29,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = controller
     await controller.async_setup()
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    await controller.async_trigger_evaluation()
     return True
 
 
@@ -65,7 +67,7 @@ def _direction_to_azimuth(value: str | None) -> int:
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate old config entries to the current schema."""
-    if entry.version >= 6:
+    if entry.version >= 7:
         return True
 
     data = dict(entry.data)
@@ -109,6 +111,18 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         data[CONF_COVERS] = [cover_entry]
         data.setdefault(CONF_ROOM_NAME, cover_entry[CONF_COVER])
 
-    hass.config_entries.async_update_entry(entry, data=data, version=6)
-    _LOGGER.debug("Migrated config entry %s to version 6", entry.entry_id)
+    if entry.version < 7:
+        room_name = data.get(CONF_ROOM_NAME)
+        if isinstance(room_name, str):
+            area = area_registry.async_get(hass).async_get_area(room_name)
+            if area is not None:
+                data[CONF_ROOM_NAME] = area.name
+
+    hass.config_entries.async_update_entry(
+        entry,
+        data=data,
+        title=data.get(CONF_ROOM_NAME, entry.title),
+        version=7,
+    )
+    _LOGGER.debug("Migrated config entry %s to version 7", entry.entry_id)
     return True

@@ -7,7 +7,8 @@ A Home Assistant custom integration for automated cover/shutter control – conf
 
 ## Features
 
-- One config entry per cover
+- One config entry per room
+- Multiple covers per room
 - Full shading logic in Python:
   - Night/day shading with configurable positions
   - Window/door contact detection (multiple sensors per cover)
@@ -38,17 +39,20 @@ Restart HA.
 
 **Settings → Integrations → + Add → Cover Control**
 
+First configure the room-level settings, then add one or more covers to the room. Existing rooms can be extended later via the integration's configure dialog.
+
 | Field | Required | Description |
 |---|---|---|
+| Room name | ✅ | Area-based room selection shown with the friendly area name |
+| Shading hysteresis | ✅ | `binary_sensor.shading_hysteresis` |
+| Day/night mode | ✅ | `input_boolean.day_night_mode` |
+| Shading height | ✅ | Shared target position for shading |
+| Event switch | – | `switch.*` used as the shared trigger for shading events |
+| Event switch position | – | Target position used while the event switch is active |
 | Cover entity | ✅ | The `cover.*` entity to control |
 | Window/door contacts | – | Multiple `binary_sensor.*` supported |
 | Sun azimuth start | ✅ | `0..359` degrees |
 | Sun azimuth end | ✅ | `0..359` degrees (`start > end` wraps over `0°`) |
-| Room automation | ✅ | `input_select.*` with values like `Automatic`, `Forced`, `Inactive`, `Manual`, `Sleep`, `Closed` |
-| Shading hysteresis | ✅ | `binary_sensor.shading_hysteresis` |
-| Day/night mode | ✅ | `input_boolean.day_night_mode` |
-| Shading height | ✅ | `input_number.*` used as the single target position |
-| Event switch | – | `switch.*` used as the shared trigger for shading events |
 
 ## Decision Logic (Priority)
 

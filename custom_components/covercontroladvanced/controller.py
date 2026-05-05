@@ -38,6 +38,7 @@ class CoverControlAdvancedController:
         self.hass = hass
         self._cfg = entry.data
         self._unsubs: list[Callable] = []
+        self._listeners: list[Callable[[], None]] = []
         self._shading_off_unsub: Callable | None = None
         self.last_reasons: dict[str, str] = {
             cover_cfg[CONF_COVER]: "initializing"
@@ -97,6 +98,21 @@ class CoverControlAdvancedController:
     async def async_trigger_evaluation(self) -> None:
         """Public entry point to trigger a cover re-evaluation (e.g. from the select entity)."""
         await self._evaluate()
+
+    def async_add_listener(self, listener: Callable[[], None]) -> Callable[[], None]:
+        """Register a listener that is notified after each evaluation run."""
+        self._listeners.append(listener)
+
+        def _remove_listener() -> None:
+            if listener in self._listeners:
+                self._listeners.remove(listener)
+
+        return _remove_listener
+
+    @callback
+    def _notify_listeners(self) -> None:
+        for listener in list(self._listeners):
+            listener()
 
     # --------------------------------------------------------------- helpers
 
@@ -202,6 +218,7 @@ class CoverControlAdvancedController:
         room_mode = self.room_mode
         for cover_cfg in self._cfg.get(CONF_COVERS, []):
             await self._evaluate_cover(cover_cfg, room_mode)
+        self._notify_listeners()
 
     async def _evaluate_cover(self, cover_cfg: dict, room_mode: str) -> None:
         cover = cover_cfg[CONF_COVER]
