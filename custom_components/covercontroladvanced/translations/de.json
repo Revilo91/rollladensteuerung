@@ -7,7 +7,7 @@
         "data": {
           "room_name": "Raumname",
           "shading_hysteresis": "Beschattungshysterese-Sensor",
-          "day_night_mode": "Tag/Nacht-Modus (input_boolean)",
+          "day_night_mode": "Tag/Nacht-Modus",
           "shading_height": "Beschattungshöhe (%)",
           "event_switch": "Event-Schalter (optional)",
           "event_switch_position": "Zielposition bei aktivem Event-Schalter (%)"
@@ -64,7 +64,7 @@
         "data": {
           "room_name": "Raumname",
           "shading_hysteresis": "Beschattungshysterese-Sensor",
-          "day_night_mode": "Tag/Nacht-Modus (input_boolean)",
+          "day_night_mode": "Tag/Nacht-Modus",
           "shading_height": "Beschattungshöhe (%)",
           "event_switch": "Event-Schalter (optional)",
           "event_switch_position": "Zielposition bei aktivem Event-Schalter (%)"
