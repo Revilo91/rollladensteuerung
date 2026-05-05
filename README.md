@@ -26,6 +26,27 @@ A Home Assistant custom integration for automated cover/shutter control – conf
 3. Category: `Integration`
 4. Add repository, then install
 
+## HACS Default Store Readiness
+
+This repository is structured for HACS as a custom integration and includes local brand assets for the `covercontroladvanced` domain.
+
+Before submitting it to the default HACS store, complete the remaining GitHub-side requirements:
+
+1. Set a repository description on GitHub.
+2. Add repository topics on GitHub, for example `home-assistant`, `hacs`, `integration`, `cover`, `roller-shutter`.
+3. Ensure the validation workflow passes on the default branch without ignored HACS checks.
+4. Publish a GitHub release after the checks pass.
+5. Submit a pull request to `hacs/default` and add this repository alphabetically to the `integration` list.
+
+The integration brand assets are stored in `custom_components/covercontroladvanced/brand/`.
+
+Supporting documents for the submission process:
+
+- Default store PR draft: `docs/HACS_DEFAULT_STORE_PR.md`
+- Release checklist: `docs/RELEASE_CHECKLIST.md`
+- Release notes draft: `docs/RELEASE_NOTES_1.0.0.md`
+- GitHub metadata suggestions: `docs/GITHUB_METADATA.md`
+
 ## Manual Installation
 
 ```bash
