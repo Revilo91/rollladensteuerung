@@ -17,7 +17,7 @@
 - Betrachte `config_flow.py`, `const.py`, `controller.py` und `sensor.py` als Kernvertrag der Integration. Änderungen an Konfigurationsschlüsseln in `const.py` müssen immer in Config Flow, Laufzeitlogik und Übersetzungen nachgezogen werden.
 - Der Diagnose-Sensor zeigt den Entscheidungsgrund des Controllers an. Wenn du die Entscheidungslogik änderst, muss `last_reason` weiterhin verständlich, kurz und für Nutzer lesbar bleiben.
 - Die Integration arbeitet mit in Config Entries gespeicherten Home-Assistant-Entity-IDs. Ersetze diese nicht durch harte Annahmen oder abgeleitete Werte, außer wenn die Aufgabe ausdrücklich eine Migration verlangt.
-- Die bestehende Logik unterscheidet Tag/Nacht, Beschattungshysterese, Raummodi, Richtungssensoren, optionale Schlafposition und optionalen Event-Schalter. Dieses Verhalten bleibt erhalten, solange die Aufgabe keine geänderten Fachregeln verlangt.
+- Die bestehende Logik unterscheidet Tag/Nacht, Beschattungsfreigabe über einen Binary-Sensor (`on` = Beschattung aktiv, `off` = keine Beschattung), Raummodi, Richtungssensoren, optionale Schlafposition und optionalen Event-Schalter. Dieses Verhalten bleibt erhalten, solange die Aufgabe keine geänderten Fachregeln verlangt.
 
 ## Kanonische Benennung
 
@@ -41,11 +41,11 @@
 flowchart TD
     %% Room Level
     Room["🏠 Room"]
-    
+
     subgraph RoomParams [Room Configuration]
         State["Status Dropdown<br/>(Shading / Forced / Inactive / Closed)"]
         BaseHeight["Global Shading Height"]
-        Hysteresis["Binary Sensor (Hysteresis)"]
+        Hysteresis["Binary Sensor (Shading ON/OFF)"]
     end
 
     subgraph EventSwitch [Event Control]
@@ -62,32 +62,32 @@ flowchart TD
 
     %% Stacked Covers using 'docs' shape
     CoverStack@{ shape: docs, label: "Covers 1..N" }
-    
+
     Room ==> CoverStack
 
     subgraph CoverDetails [Cover Instance Specification]
         direction TB
-        
+
         %% Separate Azimuth Nodes
         StartAz["Start Azimuth"]
         EndAz["End Azimuth"]
-        
+
         %% Stacked Contacts with Device Class
         ContactStack@{ shape: docs, label: "Contacts 1..N" }
         DClass{{"device_class:<br/>door / window"}}
-        
+
         ContactStack --- DClass
     end
 
     %% Connect the stack to its shared definition
     CoverStack --- StartAz
     CoverStack --- EndAz
-    CoverStack --- ContactStack    
- ```  
+    CoverStack --- ContactStack
+ ```
 ## Technical Specification (Copilot Context)
 - **Entity: Room**
     - **State (Dropdown Helper):** Defines the global operating mode. Valid values: `Shading`, `Forced Shading`, `Inactive`, `Closed`.
-    - **Hysteresis (Binary Sensor):** Acts as a buffer to prevent rapid movement due to fluctuating sensor values.
+    - **Hysteresis (Binary Sensor):** Shading release input (`on` = shading, `off` = no shading). When it changes from `on` to `off`, reevaluation is delayed by 4 minutes to avoid rapid toggling.
     - **Shading Height (Value):** The default target position for all covers in the room.
     - **Event Switch:** A specialized toggle that activates a secondary set of height settings, overriding the default room height.
     - **1:N Relationship:** A single Room manages a collection of $N$ associated Covers.
@@ -100,4 +100,4 @@ flowchart TD
         - `window`: Triggers ventilation or prevents closing if open.
         - `door`: Provides lock-out protection to prevent accidental closure while people are outside.
 
-        
+
