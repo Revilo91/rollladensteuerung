@@ -2,18 +2,25 @@
   "config": {
     "step": {
       "user": {
-        "title": "Set up Cover Control Advanced",
-        "description": "Configure a shading-controlled cover.",
+        "title": "Set up Room",
+        "description": "Configure the room for shading control.",
+        "data": {
+          "room_name": "Room name",
+          "shading_hysteresis": "Shading hysteresis sensor",
+          "day_night_mode": "Day/night mode (input_boolean)",
+          "shading_height": "Shading height (%)",
+          "event_switch": "Event switch (optional)",
+          "event_switch_position": "Target position when event switch is active (%)"
+        }
+      },
+      "cover": {
+        "title": "Configure Cover",
+        "description": "Add the first cover to this room.",
         "data": {
           "cover_entity": "Cover entity",
           "window_entities": "Window / door contact sensors (binary_sensor)",
           "sun_azimuth_start": "Sun azimuth start (degrees)",
-          "sun_azimuth_end": "Sun azimuth end (degrees)",
-          "shading_hysteresis": "Shading hysteresis sensor",
-          "day_night_mode": "Day/night mode (input_boolean)",
-          "shading_height": "Shading height (%)",
-          "event_switch": "Event switch for shading events (optional)",
-          "event_switch_position": "Target position when event switch is active (%)"
+          "sun_azimuth_end": "Sun azimuth end (degrees)"
         },
         "data_description": {
           "sun_azimuth_start": "Start angle of the sun azimuth window (0-359).",
@@ -22,7 +29,7 @@
       }
     },
     "abort": {
-      "already_configured": "This cover is already configured."
+      "already_configured": "This room is already configured."
     }
   },
   "entity": {

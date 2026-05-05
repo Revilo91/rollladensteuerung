@@ -6,9 +6,11 @@ from homeassistant.helpers import selector
 
 from .const import (
     CONF_COVER,
+    CONF_COVERS,
     CONF_DAY_NIGHT_MODE,
     CONF_EVENT_SWITCH,
     CONF_EVENT_SWITCH_POSITION,
+    CONF_ROOM_NAME,
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
     CONF_SUN_AZIMUTH_END,
@@ -17,34 +19,9 @@ from .const import (
     DOMAIN,
 )
 
-_SCHEMA = vol.Schema(
+_ROOM_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_COVER): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="cover")
-        ),
-        vol.Optional(CONF_WINDOW_ENTITIES, default=[]): selector.EntitySelector(
-            selector.EntitySelectorConfig(
-                domain="binary_sensor", device_class=["window", "door"], multiple=True
-            )
-        ),
-        vol.Required(CONF_SUN_AZIMUTH_START, default=135): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0,
-                max=359,
-                step=1,
-                unit_of_measurement="°",
-                mode=selector.NumberSelectorMode.BOX,
-            )
-        ),
-        vol.Required(CONF_SUN_AZIMUTH_END, default=225): selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                min=0,
-                max=359,
-                step=1,
-                unit_of_measurement="°",
-                mode=selector.NumberSelectorMode.BOX,
-            )
-        ),
+        vol.Required(CONF_ROOM_NAME): selector.TextSelector(),
         vol.Required(
             CONF_SHADING_HYSTERESIS,
             default="",
@@ -83,15 +60,57 @@ _SCHEMA = vol.Schema(
     }
 )
 
+_COVER_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_COVER): selector.EntitySelector(
+            selector.EntitySelectorConfig(domain="cover")
+        ),
+        vol.Optional(CONF_WINDOW_ENTITIES, default=[]): selector.EntitySelector(
+            selector.EntitySelectorConfig(
+                domain="binary_sensor", device_class=["window", "door"], multiple=True
+            )
+        ),
+        vol.Required(CONF_SUN_AZIMUTH_START, default=135): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0,
+                max=359,
+                step=1,
+                unit_of_measurement="°",
+                mode=selector.NumberSelectorMode.BOX,
+            )
+        ),
+        vol.Required(CONF_SUN_AZIMUTH_END, default=225): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0,
+                max=359,
+                step=1,
+                unit_of_measurement="°",
+                mode=selector.NumberSelectorMode.BOX,
+            )
+        ),
+    }
+)
+
 
 class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 5
+    VERSION = 6
+
+    def __init__(self) -> None:
+        self._room_data: dict = {}
 
     async def async_step_user(self, user_input=None):
         if user_input is not None:
-            cover = user_input[CONF_COVER]
-            await self.async_set_unique_id(f"{DOMAIN}_{cover}")
-            self._abort_if_unique_id_configured()
-            return self.async_create_entry(title=cover, data=user_input)
+            self._room_data = user_input
+            return await self.async_step_cover()
 
-        return self.async_show_form(step_id="user", data_schema=_SCHEMA)
+        return self.async_show_form(step_id="user", data_schema=_ROOM_SCHEMA)
+
+    async def async_step_cover(self, user_input=None):
+        if user_input is not None:
+            room_name = self._room_data[CONF_ROOM_NAME]
+            await self.async_set_unique_id(f"{DOMAIN}_{room_name}")
+            self._abort_if_unique_id_configured()
+            data = {**self._room_data, CONF_COVERS: [user_input]}
+            return self.async_create_entry(title=room_name, data=data)
+
+        return self.async_show_form(step_id="cover", data_schema=_COVER_SCHEMA)

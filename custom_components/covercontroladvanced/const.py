@@ -1,5 +1,8 @@
 DOMAIN = "covercontroladvanced"
 
+CONF_ROOM_NAME = "room_name"
+CONF_COVERS = "covers"
+
 CONF_COVER = "cover_entity"
 CONF_WINDOW_ENTITIES = "window_entities"
 CONF_SUN_AZIMUTH_START = "sun_azimuth_start"

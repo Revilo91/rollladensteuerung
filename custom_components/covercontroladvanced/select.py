@@ -11,7 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import (
-    CONF_COVER,
+    CONF_ROOM_NAME,
     DOMAIN,
     ROOM_MODE_AUTOMATIC,
     ROOM_MODES,
@@ -43,9 +43,9 @@ class CoverControlAdvancedRoomModeSelect(SelectEntity, RestoreEntity):
     def __init__(self, entry: ConfigEntry, ctrl: CoverControlAdvancedController) -> None:
         self._entry = entry
         self._ctrl = ctrl
-        cover = entry.data[CONF_COVER]
-        self._attr_unique_id = f"{DOMAIN}_{cover}_room_mode"
-        self._attr_name = f"Cover Control Advanced {cover} Room Mode"
+        room_name = entry.data.get(CONF_ROOM_NAME, entry.entry_id)
+        self._attr_unique_id = f"{DOMAIN}_{room_name}_room_mode"
+        self._attr_name = f"Cover Control Advanced {room_name} Room Mode"
         self._attr_options = list(ROOM_MODES)
         self._attr_current_option = ROOM_MODE_AUTOMATIC
 

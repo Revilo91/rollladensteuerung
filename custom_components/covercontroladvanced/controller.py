@@ -10,6 +10,7 @@ from homeassistant.helpers.event import async_call_later, async_track_state_chan
 
 from .const import (
     CONF_COVER,
+    CONF_COVERS,
     CONF_DAY_NIGHT_MODE,
     CONF_EVENT_SWITCH,
     CONF_EVENT_SWITCH_POSITION,
@@ -38,7 +39,10 @@ class CoverControlAdvancedController:
         self._cfg = entry.data
         self._unsubs: list[Callable] = []
         self._shading_off_unsub: Callable | None = None
-        self.last_reason: str = "initializing"
+        self.last_reasons: dict[str, str] = {
+            cover_cfg[CONF_COVER]: "initializing"
+            for cover_cfg in entry.data.get(CONF_COVERS, [])
+        }
         self.room_mode_select: CoverControlAdvancedRoomModeSelect | None = None
 
     # ------------------------------------------------------------------ setup
@@ -79,8 +83,8 @@ class CoverControlAdvancedController:
             async_track_state_change_event(self.hass, watch, _on_state_change)
         )
         _LOGGER.debug(
-            "CoverControlAdvancedController for %s started, watching: %s",
-            self._cfg[CONF_COVER],
+            "CoverControlAdvancedController for room '%s' started, watching: %s",
+            self._cfg.get("room_name", ""),
             watch,
         )
 
@@ -100,13 +104,14 @@ class CoverControlAdvancedController:
     def _watched_entities(self) -> list[str]:
         cfg = self._cfg
         entities: list[str] = [
-            *(cfg.get(CONF_WINDOW_ENTITIES) or []),
             "sun.sun",
             cfg[CONF_SHADING_HYSTERESIS],
             cfg[CONF_DAY_NIGHT_MODE],
         ]
         if v := cfg.get(CONF_EVENT_SWITCH):
             entities.append(v)
+        for cover_cfg in cfg.get(CONF_COVERS, []):
+            entities.extend(cover_cfg.get(CONF_WINDOW_ENTITIES) or [])
         return [e for e in entities if e]
 
     def _state(self, entity_id: str | None) -> str | None:
@@ -118,41 +123,11 @@ class CoverControlAdvancedController:
     def _is_on(self, entity_id: str | None) -> bool:
         return self._state(entity_id) == STATE_ON
 
-    # -------------------------------------------------- computed properties
-
-    @property
-    def _sun_azimuth_start(self) -> float:
-        try:
-            return float(self._cfg.get(CONF_SUN_AZIMUTH_START, 135)) % 360
-        except (TypeError, ValueError):
-            return 135.0
-
-    @property
-    def _sun_azimuth_end(self) -> float:
-        try:
-            return float(self._cfg.get(CONF_SUN_AZIMUTH_END, 225)) % 360
-        except (TypeError, ValueError):
-            return 225.0
+    # -------------------------------------------------- room-level properties
 
     @property
     def is_day(self) -> bool:
         return self._is_on(self._cfg[CONF_DAY_NIGHT_MODE])
-
-    @property
-    def is_window(self) -> bool:
-        """True if at least one sensor has device_class=window."""
-        for eid in self._cfg.get(CONF_WINDOW_ENTITIES) or []:
-            s = self.hass.states.get(eid)
-            if s and s.attributes.get("device_class") == "window":
-                return True
-        return False
-
-    @property
-    def is_window_open(self) -> bool:
-        return any(
-            self._state(eid) == STATE_ON
-            for eid in (self._cfg.get(CONF_WINDOW_ENTITIES) or [])
-        )
 
     @property
     def room_mode(self) -> str:
@@ -160,24 +135,6 @@ class CoverControlAdvancedController:
         if self.room_mode_select is not None:
             return self.room_mode_select.current_option or ROOM_MODE_AUTOMATIC
         return ROOM_MODE_AUTOMATIC
-
-    @property
-    def is_sun_on_window(self) -> bool:
-        sun = self.hass.states.get("sun.sun")
-        if not sun:
-            return False
-
-        try:
-            azimuth = float(sun.attributes.get("azimuth")) % 360
-        except (TypeError, ValueError):
-            return False
-
-        start = self._sun_azimuth_start
-        end = self._sun_azimuth_end
-
-        if start <= end:
-            return start <= azimuth <= end
-        return azimuth >= start or azimuth <= end
 
     @property
     def event_on(self) -> bool:
@@ -201,74 +158,124 @@ class CoverControlAdvancedController:
     def hysteresis(self) -> bool:
         return self._is_on(self._cfg[CONF_SHADING_HYSTERESIS])
 
+    # -------------------------------------------------- cover-level helpers
+
+    def _cover_has_window(self, cover_cfg: dict) -> bool:
+        """True if at least one contact sensor has device_class=window."""
+        for eid in cover_cfg.get(CONF_WINDOW_ENTITIES) or []:
+            s = self.hass.states.get(eid)
+            if s and s.attributes.get("device_class") == "window":
+                return True
+        return False
+
+    def _cover_window_open(self, cover_cfg: dict) -> bool:
+        """True if any contact sensor reports open (state=on)."""
+        return any(
+            self._state(eid) == STATE_ON
+            for eid in (cover_cfg.get(CONF_WINDOW_ENTITIES) or [])
+        )
+
+    def _cover_sun_on_window(self, cover_cfg: dict) -> bool:
+        """True if the sun azimuth is within the range configured for this cover."""
+        sun = self.hass.states.get("sun.sun")
+        if not sun:
+            return False
+
+        try:
+            azimuth = float(sun.attributes.get("azimuth")) % 360
+        except (TypeError, ValueError):
+            return False
+
+        try:
+            start = float(cover_cfg.get(CONF_SUN_AZIMUTH_START, 135)) % 360
+            end = float(cover_cfg.get(CONF_SUN_AZIMUTH_END, 225)) % 360
+        except (TypeError, ValueError):
+            return False
+
+        if start <= end:
+            return start <= azimuth <= end
+        return azimuth >= start or azimuth <= end
+
     # ----------------------------------------------------------- main logic
 
     async def _evaluate(self) -> None:
-        cover = self._cfg[CONF_COVER]
         room_mode = self.room_mode
+        for cover_cfg in self._cfg.get(CONF_COVERS, []):
+            await self._evaluate_cover(cover_cfg, room_mode)
+
+    async def _evaluate_cover(self, cover_cfg: dict, room_mode: str) -> None:
+        cover = cover_cfg[CONF_COVER]
+        is_window = self._cover_has_window(cover_cfg)
+        is_window_open = self._cover_window_open(cover_cfg)
+        is_sun_on_window = self._cover_sun_on_window(cover_cfg)
 
         # 1. Night + window open → night position
-        if not self.is_day and self.is_window and self.is_window_open:
-            self.last_reason = "night_window_shading"
+        if not self.is_day and is_window and is_window_open:
+            self.last_reasons[cover] = "night_window_shading"
             await self._set_pos(cover, self.shading_height)
             return
 
         # 2. Door open (no window sensor) → open
-        if not self.is_window and self.is_window_open:
-            self.last_reason = "door_open"
+        if not is_window and is_window_open:
+            self.last_reasons[cover] = "door_open"
             await self._open(cover)
             return
 
         # 3. Room: closed → close completely
         if room_mode == ROOM_MODE_CLOSED:
-            self.last_reason = "room_closed"
+            self.last_reasons[cover] = "room_closed"
             await self._close(cover)
             return
 
         # 4. Room: shading inactive → open
         if room_mode == ROOM_MODE_INACTIVE:
-            self.last_reason = "room_inactive"
+            self.last_reasons[cover] = "room_inactive"
             await self._open(cover)
             return
 
         # 5. Event switch active → configured position (day and night)
         if self.event_on:
-            self.last_reason = "event_shading"
+            self.last_reasons[cover] = "event_shading"
             await self._set_pos(cover, self.event_switch_position)
             return
 
         # 6. Night + closed → close
-        if not self.is_window_open and not self.is_day:
-            self.last_reason = "night_closed"
+        if not is_window_open and not self.is_day:
+            self.last_reasons[cover] = "night_closed"
             await self._close(cover)
             return
 
         # 7. Day shading logic
-        window_or_closed_door = self.is_window or not self.is_window_open
+        window_or_closed_door = is_window or not is_window_open
 
         shading = (
-            (room_mode == ROOM_MODE_AUTOMATIC and self.hysteresis and self.is_sun_on_window)
-            or (room_mode == ROOM_MODE_ALWAYS_ACTIVE and self.is_sun_on_window)
+            (room_mode == ROOM_MODE_AUTOMATIC and self.hysteresis and is_sun_on_window)
+            or (room_mode == ROOM_MODE_ALWAYS_ACTIVE and is_sun_on_window)
             or (room_mode == ROOM_MODE_ACTIVE)
         )
 
         if self.is_day and window_or_closed_door and shading:
-            self.last_reason = "day_shading"
+            self.last_reasons[cover] = "day_shading"
             await self._set_pos(cover, self.shading_height)
             return
 
         # 8. Default fallback
         if self.is_day:
-            self.last_reason = "default_day"
+            self.last_reasons[cover] = "default_day"
             await self._open(cover)
         else:
-            self.last_reason = "default_night"
+            self.last_reasons[cover] = "default_night"
             await self._close(cover)
 
     # ---------------------------------------------------------- cover calls
 
     async def _set_pos(self, entity_id: str, position: int) -> None:
-        _LOGGER.debug("%s → set_position(%d) [%s]", entity_id, position, self.last_reason)
+        _LOGGER.debug(
+            "%s → set_position(%d) [%s]",
+            entity_id,
+            position,
+            self.last_reasons.get(entity_id, ""),
+        )
         await self.hass.services.async_call(
             COVER_DOMAIN,
             "set_cover_position",
@@ -277,7 +284,9 @@ class CoverControlAdvancedController:
         )
 
     async def _open(self, entity_id: str) -> None:
-        _LOGGER.debug("%s → open_cover [%s]", entity_id, self.last_reason)
+        _LOGGER.debug(
+            "%s → open_cover [%s]", entity_id, self.last_reasons.get(entity_id, "")
+        )
         await self.hass.services.async_call(
             COVER_DOMAIN,
             "open_cover",
@@ -286,7 +295,9 @@ class CoverControlAdvancedController:
         )
 
     async def _close(self, entity_id: str) -> None:
-        _LOGGER.debug("%s → close_cover [%s]", entity_id, self.last_reason)
+        _LOGGER.debug(
+            "%s → close_cover [%s]", entity_id, self.last_reasons.get(entity_id, "")
+        )
         await self.hass.services.async_call(
             COVER_DOMAIN,
             "close_cover",
