@@ -21,7 +21,7 @@ from .const import (
 
 _ROOM_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_ROOM_NAME): selector.TextSelector(),
+        vol.Required(CONF_ROOM_NAME): selector.AreaSelector(),
         vol.Required(
             CONF_SHADING_HYSTERESIS,
             default="",
