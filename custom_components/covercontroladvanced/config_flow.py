@@ -23,11 +23,6 @@ from .const import (
 )
 
 STEP_FINISH = "finish"
-ACTION_KEY = "selected_action"
-ACTION_EDIT_ROOM = "edit_room"
-ACTION_ADD_COVER = "add_cover"
-ACTION_EDIT_COVER = "edit_cover"
-ACTION_SAVE = "save"
 
 _ROOM_SCHEMA = vol.Schema(
     {
@@ -211,11 +206,15 @@ def _room_options_schema(data: dict) -> vol.Schema:
     )
 
 
-def _cover_select_schema(covers: list[dict]) -> vol.Schema:
+def _cover_select_schema(hass, covers: list[dict]) -> vol.Schema:
     options = [
         selector.SelectOptionDict(
             value=cover_cfg[CONF_COVER],
-            label=cover_cfg[CONF_COVER],
+            label=(
+                state.name
+                if (state := hass.states.get(cover_cfg[CONF_COVER])) is not None
+                else cover_cfg[CONF_COVER]
+            ),
         )
         for cover_cfg in covers
     ]
@@ -231,41 +230,12 @@ def _cover_select_schema(covers: list[dict]) -> vol.Schema:
     )
 
 
-def _options_action_schema(has_existing_covers: bool) -> vol.Schema:
-    options = [
-        selector.SelectOptionDict(
-            value=ACTION_EDIT_ROOM,
-            label="Edit room properties",
-        ),
-        selector.SelectOptionDict(
-            value=ACTION_ADD_COVER,
-            label="Add a cover",
-        ),
-    ]
-    if has_existing_covers:
-        options.append(
-            selector.SelectOptionDict(
-                value=ACTION_EDIT_COVER,
-                label="Edit an existing cover",
-            )
-        )
-    options.append(
-        selector.SelectOptionDict(
-            value=ACTION_SAVE,
-            label="Save changes",
-        )
-    )
-
-    return vol.Schema(
-        {
-            vol.Required(ACTION_KEY): selector.SelectSelector(
-                selector.SelectSelectorConfig(
-                    options=options,
-                    mode=selector.SelectSelectorMode.LIST,
-                )
-            )
-        }
-    )
+def _options_init_menu(has_covers: bool) -> list[str]:
+    options = ["room", "cover"]
+    if has_covers:
+        options.append("cover_select")
+    options.append("finish")
+    return options
 
 
 def _cover_already_added(covers: list[dict], cover_entity: str) -> bool:
@@ -339,20 +309,9 @@ class CoverControlAdvancedOptionsFlow(config_entries.OptionsFlowWithConfigEntry)
         self._dirty = False
 
     async def async_step_init(self, user_input=None):
-        if user_input is not None:
-            action = user_input[ACTION_KEY]
-            if action == ACTION_EDIT_ROOM:
-                return await self.async_step_room()
-            if action == ACTION_ADD_COVER:
-                return await self.async_step_cover()
-            if action == ACTION_EDIT_COVER:
-                return await self.async_step_cover_select()
-            if action == ACTION_SAVE:
-                return await self.async_step_finish()
-
-        return self.async_show_form(
+        return self.async_show_menu(
             step_id="init",
-            data_schema=_options_action_schema(
+            menu_options=_options_init_menu(
                 bool(self._working_data.get(CONF_COVERS))
             ),
         )
@@ -401,7 +360,7 @@ class CoverControlAdvancedOptionsFlow(config_entries.OptionsFlowWithConfigEntry)
 
         return self.async_show_form(
             step_id="cover_select",
-            data_schema=_cover_select_schema(covers),
+            data_schema=_cover_select_schema(self.hass, covers),
             errors=errors,
         )
 
