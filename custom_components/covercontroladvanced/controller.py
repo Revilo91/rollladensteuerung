@@ -2,9 +2,9 @@ import logging
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from homeassistant.components.cover import DOMAIN as COVER_DOMAIN
+from homeassistant.components.cover import DOMAIN as COVER_DOMAIN, CoverEntityFeature
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_ON
+from homeassistant.const import ATTR_SUPPORTED_FEATURES, STATE_ON
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.event import async_call_later, async_track_state_change_event
 
@@ -138,6 +138,22 @@ class CoverControlAdvancedController:
 
     def _is_on(self, entity_id: str | None) -> bool:
         return self._state(entity_id) == STATE_ON
+
+    def _supports_feature(
+        self, entity_id: str, feature: CoverEntityFeature
+    ) -> bool:
+        state = self.hass.states.get(entity_id)
+        if state is None:
+            return False
+
+        try:
+            supported = CoverEntityFeature(
+                int(state.attributes.get(ATTR_SUPPORTED_FEATURES, 0))
+            )
+        except (TypeError, ValueError):
+            return False
+
+        return bool(supported & feature)
 
     # -------------------------------------------------- room-level properties
 
@@ -287,6 +303,18 @@ class CoverControlAdvancedController:
     # ---------------------------------------------------------- cover calls
 
     async def _set_pos(self, entity_id: str, position: int) -> None:
+        if not self._supports_feature(entity_id, CoverEntityFeature.SET_POSITION):
+            fallback_action = self._close if position < 50 else self._open
+            _LOGGER.debug(
+                "%s does not support set_position(%d), falling back to %s [%s]",
+                entity_id,
+                position,
+                fallback_action.__name__,
+                self.last_reasons.get(entity_id, ""),
+            )
+            await fallback_action(entity_id)
+            return
+
         _LOGGER.debug(
             "%s → set_position(%d) [%s]",
             entity_id,
