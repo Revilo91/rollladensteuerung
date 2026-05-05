@@ -1,4 +1,4 @@
-"""Diagnostic sensor – shows the last decision reason."""
+"""Diagnostic sensor – shows the last decision reason per cover."""
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -6,8 +6,10 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
     CONF_COVER,
+    CONF_COVERS,
     CONF_EVENT_SWITCH,
     CONF_EVENT_SWITCH_POSITION,
+    CONF_ROOM_NAME,
     CONF_SUN_AZIMUTH_END,
     CONF_SUN_AZIMUTH_START,
     CONF_WINDOW_ENTITIES,
@@ -22,7 +24,12 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     ctrl: CoverControlAdvancedController = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([CoverControlAdvancedStatusSensor(entry, ctrl)])
+    async_add_entities(
+        [
+            CoverControlAdvancedStatusSensor(entry, ctrl, cover_cfg)
+            for cover_cfg in entry.data.get(CONF_COVERS, [])
+        ]
+    )
 
 
 class CoverControlAdvancedStatusSensor(SensorEntity):
@@ -43,25 +50,35 @@ class CoverControlAdvancedStatusSensor(SensorEntity):
         "default_night",
     ]
 
-    def __init__(self, entry: ConfigEntry, ctrl: CoverControlAdvancedController) -> None:
+    def __init__(
+        self,
+        entry: ConfigEntry,
+        ctrl: CoverControlAdvancedController,
+        cover_cfg: dict,
+    ) -> None:
         self._entry = entry
         self._ctrl = ctrl
-        cover = entry.data[CONF_COVER]
-        self._attr_unique_id = f"{DOMAIN}_{cover}_status"
-        self._attr_name = f"Cover Control Advanced {cover}"
+        self._cover_cfg = cover_cfg
+        cover = cover_cfg[CONF_COVER]
+        room_name = entry.data.get(CONF_ROOM_NAME, cover)
+        self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_{cover}_status"
+        self._attr_name = f"Cover Control Advanced {room_name} {cover}"
 
     @property
     def native_value(self) -> str:
-        return self._ctrl.last_reason
+        cover = self._cover_cfg[CONF_COVER]
+        return self._ctrl.last_reasons.get(cover, "initializing")
 
     @property
     def extra_state_attributes(self) -> dict:
-        cfg = self._entry.data
+        room_cfg = self._entry.data
+        cover_cfg = self._cover_cfg
         return {
-            "cover": cfg.get(CONF_COVER),
-            "event_switch": cfg.get(CONF_EVENT_SWITCH),
-            "event_switch_position": cfg.get(CONF_EVENT_SWITCH_POSITION),
-            "sun_azimuth_start": cfg.get(CONF_SUN_AZIMUTH_START),
-            "sun_azimuth_end": cfg.get(CONF_SUN_AZIMUTH_END),
-            "window_entities": cfg.get(CONF_WINDOW_ENTITIES),
+            "room_name": room_cfg.get(CONF_ROOM_NAME),
+            "cover": cover_cfg.get(CONF_COVER),
+            "event_switch": room_cfg.get(CONF_EVENT_SWITCH),
+            "event_switch_position": room_cfg.get(CONF_EVENT_SWITCH_POSITION),
+            "sun_azimuth_start": cover_cfg.get(CONF_SUN_AZIMUTH_START),
+            "sun_azimuth_end": cover_cfg.get(CONF_SUN_AZIMUTH_END),
+            "window_entities": cover_cfg.get(CONF_WINDOW_ENTITIES),
         }

@@ -7,7 +7,15 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .const import CONF_SUN_AZIMUTH_END, CONF_SUN_AZIMUTH_START, DOMAIN
+from .const import (
+    CONF_COVER,
+    CONF_COVERS,
+    CONF_ROOM_NAME,
+    CONF_SUN_AZIMUTH_END,
+    CONF_SUN_AZIMUTH_START,
+    CONF_WINDOW_ENTITIES,
+    DOMAIN,
+)
 from .controller import CoverControlAdvancedController
 
 PLATFORMS = ["sensor", "select"]
@@ -57,7 +65,7 @@ def _direction_to_azimuth(value: str | None) -> int:
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Migrate old config entries to the current schema."""
-    if entry.version >= 5:
+    if entry.version >= 6:
         return True
 
     data = dict(entry.data)
@@ -86,9 +94,21 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         data.pop("window_azimuth", None)
         data.pop("sun_azimuth_tolerance", None)
 
-    # v5: room_switch is now an internal select entity – remove the old config key
-    data.pop("room_switch", None)
+    if entry.version < 5:
+        # v5: room_switch is now an internal select entity – remove the old config key
+        data.pop("room_switch", None)
 
-    hass.config_entries.async_update_entry(entry, data=data, version=5)
-    _LOGGER.debug("Migrated config entry %s to version 5", entry.entry_id)
+    if entry.version < 6:
+        # v6: restructure flat data into room-level config + covers list
+        cover_entry = {
+            CONF_COVER: data.pop(CONF_COVER),
+            CONF_WINDOW_ENTITIES: data.pop(CONF_WINDOW_ENTITIES, []),
+            CONF_SUN_AZIMUTH_START: data.pop(CONF_SUN_AZIMUTH_START, 135),
+            CONF_SUN_AZIMUTH_END: data.pop(CONF_SUN_AZIMUTH_END, 225),
+        }
+        data[CONF_COVERS] = [cover_entry]
+        data.setdefault(CONF_ROOM_NAME, cover_entry[CONF_COVER])
+
+    hass.config_entries.async_update_entry(entry, data=data, version=6)
+    _LOGGER.debug("Migrated config entry %s to version 6", entry.entry_id)
     return True
