@@ -16,7 +16,7 @@ A Home Assistant custom integration for automated cover/shutter control – conf
   - Event-switch controlled shading events
   - Cinema/event handling via a shared event switch
   - Sleep and closed mode
-  - Shading hysteresis with 4-minute off-delay
+    - Shading release via binary sensor (`on` = shade allowed, `off` = shade blocked) with 4-minute off-delay
 - Diagnostic sensor per cover showing the last decision reason
 
 ## Installation via HACS
@@ -44,7 +44,7 @@ First configure the room-level settings, then add one or more covers to the room
 | Field | Required | Description |
 |---|---|---|
 | Room name | ✅ | Area-based room selection shown with the friendly area name |
-| Shading hysteresis | ✅ | `binary_sensor.shading_hysteresis` |
+| Shading hysteresis | ✅ | Binary sensor for shading (`on` = shading , `off` = no shading). `off` is delayed by 4 minutes before reevaluation. |
 | Day/night mode | ✅ | `input_boolean.day_night_mode` |
 | Shading height | ✅ | Shared target position for shading |
 | Event switch | – | `switch.*` used as the shared trigger for shading events |
@@ -80,7 +80,7 @@ flowchart TD
     subgraph RoomParams [Room Configuration]
         State["Status Dropdown<br/>(Shading / Forced / Inactive / Closed)"]
         BaseHeight["Global Shading Height"]
-        Hysteresis["Binary Sensor (Hysteresis)"]
+        Hysteresis["Binary Sensor (Shading ON/OFF)"]
     end
 
     subgraph EventSwitch [Event Control]
@@ -122,7 +122,7 @@ flowchart TD
 ## Technical Specification
 - **Entity: Room**
     - **State (Dropdown Helper):** Defines the global operating mode. Valid values: `Shading`, `Forced Shading`, `Inactive`, `Closed`.
-    - **Hysteresis (Binary Sensor):** Acts as a buffer to prevent rapid movement due to fluctuating sensor values.
+    - **Hysteresis (Binary Sensor):** Shading release input (`on` = shading , `off` = no shading). When it changes from `on` to `off`, reevaluation is delayed by 4 minutes to avoid rapid toggling.
     - **Shading Height (Value):** The default target position for all covers in the room.
     - **Event Switch:** A specialized toggle that activates a secondary set of height settings, overriding the default room height.
     - **1:N Relationship:** A single Room manages a collection of $N$ associated Covers.
