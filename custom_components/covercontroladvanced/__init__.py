@@ -52,7 +52,7 @@ def build_device_info(hass: HomeAssistant, entry: ConfigEntry) -> DeviceInfo:
         manufacturer="Cover Control Advanced",
     )
 
-PLATFORMS = ["sensor", "select", "binary_sensor"]
+PLATFORMS = ["sensor", "select", "binary_sensor", "switch", "cover"]
 _LOGGER = logging.getLogger(__name__)
 
 

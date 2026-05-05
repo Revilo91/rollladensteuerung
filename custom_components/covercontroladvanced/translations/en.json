@@ -152,6 +152,11 @@
           "closed": "Closed"
         }
       }
+    },
+    "switch": {
+      "event_switch_proxy": {
+        "name": "Event Switch"
+      }
     }
   }
 }

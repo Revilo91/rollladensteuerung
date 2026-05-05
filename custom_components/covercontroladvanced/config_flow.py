@@ -149,10 +149,8 @@ def _cover_schema_with_defaults(cover_cfg: dict) -> vol.Schema:
 
 def _room_options_schema(data: dict) -> vol.Schema:
     event_switch = data.get(CONF_EVENT_SWITCH)
-    event_switch_field = (
-        vol.Optional(CONF_EVENT_SWITCH, default=event_switch)
-        if event_switch
-        else vol.Optional(CONF_EVENT_SWITCH)
+    event_switch_description = (
+        {"suggested_value": event_switch} if event_switch else None
     )
 
     return vol.Schema(
@@ -187,7 +185,10 @@ def _room_options_schema(data: dict) -> vol.Schema:
                     mode=selector.NumberSelectorMode.SLIDER,
                 )
             ),
-            event_switch_field: selector.EntitySelector(
+            vol.Optional(
+                CONF_EVENT_SWITCH,
+                description=event_switch_description,
+            ): selector.EntitySelector(
                 selector.EntitySelectorConfig(domain="switch")
             ),
             vol.Optional(
@@ -319,8 +320,10 @@ class CoverControlAdvancedOptionsFlow(config_entries.OptionsFlowWithConfigEntry)
     async def async_step_room(self, user_input=None):
         if user_input is not None:
             # Optional fields are absent when cleared in the form.
-            if CONF_EVENT_SWITCH not in user_input:
+            # Some frontends can also submit an empty string for a cleared selector.
+            if not user_input.get(CONF_EVENT_SWITCH):
                 self._working_data.pop(CONF_EVENT_SWITCH, None)
+                user_input.pop(CONF_EVENT_SWITCH, None)
             self._working_data.update(user_input)
             self._dirty = True
             return await self.async_step_init()
