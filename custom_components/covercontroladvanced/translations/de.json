@@ -9,7 +9,6 @@
           "window_entities": "Fenster- / Türkontakte (binary_sensor)",
           "sun_azimuth_start": "Sonnen-Azimut Start (Grad)",
           "sun_azimuth_end": "Sonnen-Azimut Ende (Grad)",
-          "room_switch": "Raumautomationsauswahl (input_select)",
           "shading_hysteresis": "Beschattungshysterese-Sensor",
           "day_night_mode": "Tag/Nacht-Modus (input_boolean)",
           "shading_height": "Beschattungshöhe (%)",
@@ -33,13 +32,25 @@
           "initializing": "Initialisierung",
           "night_window_shading": "Nacht + Fenster offen → Beschattungshöhe",
           "door_open": "Tür offen → öffnen",
+          "room_closed": "Raum: geschlossen → schließen",
+          "room_inactive": "Raum: Beschattung inaktiv → öffnen",
           "event_shading": "Event-Schalter aktiv → Zielposition",
           "night_closed": "Nacht + geschlossen → schließen",
-          "sleep_shading": "Schlafmodus → Beschattungshöhe",
-          "room_closed": "Raum: geschlossen → schließen",
           "day_shading": "Tag-Beschattung aktiv → Beschattungshöhe",
           "default_day": "Standard: Tag → öffnen",
           "default_night": "Standard: Nacht → schließen"
+        }
+      }
+    },
+    "select": {
+      "room_mode": {
+        "name": "Raummodus",
+        "state": {
+          "automatic": "Beschattung automatisch",
+          "always_active": "Beschattung immer aktiv",
+          "active": "Beschattung aktiv",
+          "inactive": "Beschattung inaktiv",
+          "closed": "Zu"
         }
       }
     }

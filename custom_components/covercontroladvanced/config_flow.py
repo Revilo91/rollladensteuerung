@@ -9,7 +9,6 @@ from .const import (
     CONF_DAY_NIGHT_MODE,
     CONF_EVENT_SWITCH,
     CONF_EVENT_SWITCH_POSITION,
-    CONF_ROOM_SWITCH,
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
     CONF_SUN_AZIMUTH_END,
@@ -45,9 +44,6 @@ _SCHEMA = vol.Schema(
                 unit_of_measurement="°",
                 mode=selector.NumberSelectorMode.BOX,
             )
-        ),
-        vol.Required(CONF_ROOM_SWITCH): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="input_select")
         ),
         vol.Required(
             CONF_SHADING_HYSTERESIS,

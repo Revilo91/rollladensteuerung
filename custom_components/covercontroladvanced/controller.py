@@ -1,5 +1,6 @@
 import logging
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from homeassistant.components.cover import DOMAIN as COVER_DOMAIN
 from homeassistant.config_entries import ConfigEntry
@@ -12,14 +13,21 @@ from .const import (
     CONF_DAY_NIGHT_MODE,
     CONF_EVENT_SWITCH,
     CONF_EVENT_SWITCH_POSITION,
-    CONF_ROOM_SWITCH,
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
     CONF_SUN_AZIMUTH_END,
     CONF_SUN_AZIMUTH_START,
     CONF_WINDOW_ENTITIES,
+    ROOM_MODE_ACTIVE,
+    ROOM_MODE_ALWAYS_ACTIVE,
+    ROOM_MODE_AUTOMATIC,
+    ROOM_MODE_CLOSED,
+    ROOM_MODE_INACTIVE,
     SHADING_OFF_DELAY,
 )
+
+if TYPE_CHECKING:
+    from .select import CoverControlAdvancedRoomModeSelect
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,6 +39,7 @@ class CoverControlAdvancedController:
         self._unsubs: list[Callable] = []
         self._shading_off_unsub: Callable | None = None
         self.last_reason: str = "initializing"
+        self.room_mode_select: CoverControlAdvancedRoomModeSelect | None = None
 
     # ------------------------------------------------------------------ setup
 
@@ -81,6 +90,10 @@ class CoverControlAdvancedController:
         if self._shading_off_unsub:
             self._shading_off_unsub()
 
+    async def async_trigger_evaluation(self) -> None:
+        """Public entry point to trigger a cover re-evaluation (e.g. from the select entity)."""
+        await self._evaluate()
+
     # --------------------------------------------------------------- helpers
 
     @property
@@ -91,7 +104,6 @@ class CoverControlAdvancedController:
             "sun.sun",
             cfg[CONF_SHADING_HYSTERESIS],
             cfg[CONF_DAY_NIGHT_MODE],
-            cfg[CONF_ROOM_SWITCH],
         ]
         if v := cfg.get(CONF_EVENT_SWITCH):
             entities.append(v)
@@ -143,39 +155,11 @@ class CoverControlAdvancedController:
         )
 
     @property
-    def room_switch(self) -> str:
-        """Current state of the room input_select."""
-        return self._state(self._cfg[CONF_ROOM_SWITCH]) or ""
-
-    @property
-    def shading_active(self) -> bool:
-        rs = self.room_switch.lower()
-        return "inaktiv" not in rs and "inactive" not in rs
-
-    @property
-    def shading_forced(self) -> bool:
-        rs = self.room_switch.lower()
-        return "erzwungen" in rs or "forced" in rs
-
-    @property
-    def shading_automatic(self) -> bool:
-        rs = self.room_switch.lower()
-        return "automatik" in rs or "automatic" in rs
-
-    @property
-    def shading_manual(self) -> bool:
-        rs = self.room_switch.lower()
-        return "manuell" in rs or "manual" in rs
-
-    @property
-    def is_sleep_mode(self) -> bool:
-        rs = self.room_switch.lower()
-        return "schlafen" in rs or "sleep" in rs
-
-    @property
-    def is_room_closed(self) -> bool:
-        rs = self.room_switch.lower()
-        return "zu" in rs or "closed" in rs
+    def room_mode(self) -> str:
+        """Current room mode from the internal select entity."""
+        if self.room_mode_select is not None:
+            return self.room_mode_select.current_option or ROOM_MODE_AUTOMATIC
+        return ROOM_MODE_AUTOMATIC
 
     @property
     def is_sun_on_window(self) -> bool:
@@ -221,6 +205,7 @@ class CoverControlAdvancedController:
 
     async def _evaluate(self) -> None:
         cover = self._cfg[CONF_COVER]
+        room_mode = self.room_mode
 
         # 1. Night + window open → night position
         if not self.is_day and self.is_window and self.is_window_open:
@@ -234,40 +219,40 @@ class CoverControlAdvancedController:
             await self._open(cover)
             return
 
-        # 3. Event switch active → configured position (day and night)
-        if self.event_on and self.shading_active:
+        # 3. Room: closed → close completely
+        if room_mode == ROOM_MODE_CLOSED:
+            self.last_reason = "room_closed"
+            await self._close(cover)
+            return
+
+        # 4. Room: shading inactive → open
+        if room_mode == ROOM_MODE_INACTIVE:
+            self.last_reason = "room_inactive"
+            await self._open(cover)
+            return
+
+        # 5. Event switch active → configured position (day and night)
+        if self.event_on:
             self.last_reason = "event_shading"
             await self._set_pos(cover, self.event_switch_position)
             return
 
-        # 4. Night + closed → close
+        # 6. Night + closed → close
         if not self.is_window_open and not self.is_day:
             self.last_reason = "night_closed"
             await self._close(cover)
             return
 
-        # 5. Day + sleep mode
-        if self.is_day and self.is_sleep_mode:
-            self.last_reason = "sleep_shading"
-            await self._set_pos(cover, self.shading_height)
-            return
-
-        # 6. Room forced closed
-        if self.is_room_closed:
-            self.last_reason = "room_closed"
-            await self._close(cover)
-            return
-
-        # 7. Day + shading active + sun on configured azimuth
+        # 7. Day shading logic
         window_or_closed_door = self.is_window or not self.is_window_open
 
         shading = (
-            (self.hysteresis and self.is_sun_on_window and self.shading_automatic)
-            or (self.is_sun_on_window and self.shading_forced)
-            or self.shading_manual
+            (room_mode == ROOM_MODE_AUTOMATIC and self.hysteresis and self.is_sun_on_window)
+            or (room_mode == ROOM_MODE_ALWAYS_ACTIVE and self.is_sun_on_window)
+            or (room_mode == ROOM_MODE_ACTIVE)
         )
 
-        if self.shading_active and self.is_day and window_or_closed_door and shading:
+        if self.is_day and window_or_closed_door and shading:
             self.last_reason = "day_shading"
             await self._set_pos(cover, self.shading_height)
             return
