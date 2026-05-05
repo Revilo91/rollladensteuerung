@@ -34,7 +34,9 @@
           "door_open": "Door open → open",
           "room_closed": "Room: closed → close",
           "room_inactive": "Room: shading inactive → open",
-          "event_shading": "Event switch active → target position",
+          "night_event_shading": "Night + event switch active → shading height",
+          "cinema_event_close": "Cinema mode: event switch active → close",
+          "sleep_shading": "Sleep mode → shading height",
           "night_closed": "Night + closed → close",
           "day_shading": "Day shading active → shading height",
           "default_day": "Default: day → open",
@@ -50,6 +52,7 @@
           "always_active": "Shading always active",
           "active": "Shading active",
           "inactive": "Shading inactive",
+          "sleep": "Sleep mode",
           "closed": "Closed"
         }
       }

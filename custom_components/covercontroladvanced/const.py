@@ -16,6 +16,7 @@ ROOM_MODE_AUTOMATIC = "automatic"        # Beschattung automatisch
 ROOM_MODE_ALWAYS_ACTIVE = "always_active"  # Beschattung immer aktiv
 ROOM_MODE_ACTIVE = "active"              # Beschattung aktiv
 ROOM_MODE_INACTIVE = "inactive"          # Beschattung inaktiv
+ROOM_MODE_SLEEP = "sleep"               # Schlafmodus
 ROOM_MODE_CLOSED = "closed"              # Zu
 
 ROOM_MODES: list[str] = [
@@ -23,5 +24,6 @@ ROOM_MODES: list[str] = [
     ROOM_MODE_ALWAYS_ACTIVE,
     ROOM_MODE_ACTIVE,
     ROOM_MODE_INACTIVE,
+    ROOM_MODE_SLEEP,
     ROOM_MODE_CLOSED,
 ]

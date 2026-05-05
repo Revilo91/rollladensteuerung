@@ -34,7 +34,9 @@
           "door_open": "Tür offen → öffnen",
           "room_closed": "Raum: geschlossen → schließen",
           "room_inactive": "Raum: Beschattung inaktiv → öffnen",
-          "event_shading": "Event-Schalter aktiv → Zielposition",
+          "night_event_shading": "Nacht + Event-Schalter aktiv → Beschattungshöhe",
+          "cinema_event_close": "Kinomodus: Event-Schalter aktiv → schließen",
+          "sleep_shading": "Schlafmodus → Beschattungshöhe",
           "night_closed": "Nacht + geschlossen → schließen",
           "day_shading": "Tag-Beschattung aktiv → Beschattungshöhe",
           "default_day": "Standard: Tag → öffnen",
@@ -50,6 +52,7 @@
           "always_active": "Beschattung immer aktiv",
           "active": "Beschattung aktiv",
           "inactive": "Beschattung inaktiv",
+          "sleep": "Schlafmodus",
           "closed": "Zu"
         }
       }
