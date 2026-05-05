@@ -74,7 +74,7 @@ class CoverControlAdvancedController:
                     self._shading_off_unsub = async_call_later(
                         self.hass,
                         SHADING_OFF_DELAY,
-                        lambda _: self.hass.async_create_task(self._evaluate()),
+                        lambda _: self.hass.create_task(self._evaluate()),
                     )
                     return
                 if new == STATE_ON and old != STATE_ON:
@@ -83,7 +83,7 @@ class CoverControlAdvancedController:
                         self._shading_off_unsub()
                         self._shading_off_unsub = None
 
-            self.hass.async_create_task(self._evaluate())
+            self.hass.create_task(self._evaluate())
 
         self._unsubs.append(
             async_track_state_change_event(self.hass, watch, _on_state_change)
@@ -91,7 +91,7 @@ class CoverControlAdvancedController:
         self._unsubs.append(
             async_track_time_interval(
                 self.hass,
-                lambda _: self.hass.async_create_task(self._evaluate()),
+                lambda _: self.hass.create_task(self._evaluate()),
                 timedelta(minutes=1),
             )
         )
