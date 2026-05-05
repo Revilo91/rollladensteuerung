@@ -4,10 +4,10 @@ from collections.abc import Callable
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import build_device_info
+from . import build_device_info, entity_friendly_name
 from .const import (
     CONF_COVER,
     CONF_COVERS,
@@ -29,16 +29,20 @@ async def async_setup_entry(
 ) -> None:
     ctrl: CoverControlAdvancedController = hass.data[DOMAIN][entry.entry_id]
     device_info = build_device_info(hass, entry)
+    covers = entry.data.get(CONF_COVERS, [])
+    multi_cover = len(covers) > 1
     entities: list[SensorEntity] = []
-    for cover_cfg in entry.data.get(CONF_COVERS, []):
+    for cover_cfg in covers:
+        cover_id = cover_cfg[CONF_COVER]
+        c_name = entity_friendly_name(hass, cover_id) if multi_cover else None
         entities.append(
-            CoverControlAdvancedStatusSensor(entry, ctrl, cover_cfg, device_info)
+            CoverControlAdvancedStatusSensor(entry, ctrl, cover_cfg, device_info, c_name)
         )
         entities.append(
-            CoverControlAdvancedAzimuthStartSensor(entry, cover_cfg, device_info)
+            CoverControlAdvancedAzimuthStartSensor(entry, cover_cfg, device_info, c_name)
         )
         entities.append(
-            CoverControlAdvancedAzimuthEndSensor(entry, cover_cfg, device_info)
+            CoverControlAdvancedAzimuthEndSensor(entry, cover_cfg, device_info, c_name)
         )
     entities.append(CoverControlAdvancedShadingHeightSensor(entry, device_info))
     if entry.data.get(CONF_EVENT_SWITCH):
@@ -73,6 +77,7 @@ class CoverControlAdvancedStatusSensor(SensorEntity):
         ctrl: CoverControlAdvancedController,
         cover_cfg: dict,
         device_info: DeviceInfo,
+        cover_name: str | None,
     ) -> None:
         self._entry = entry
         self._ctrl = ctrl
@@ -83,6 +88,8 @@ class CoverControlAdvancedStatusSensor(SensorEntity):
         # Keep legacy unique_id to avoid breaking existing installations
         self._attr_unique_id = f"{room_name}_{cover}_status"
         self._attr_device_info = device_info
+        if cover_name:
+            self._attr_name = f"{cover_name} Status"
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
@@ -108,17 +115,21 @@ class CoverControlAdvancedAzimuthStartSensor(SensorEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "azimuth_start"
     _attr_native_unit_of_measurement = "°"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(
         self,
         entry: ConfigEntry,
         cover_cfg: dict,
         device_info: DeviceInfo,
+        cover_name: str | None,
     ) -> None:
         cover = cover_cfg[CONF_COVER]
         self._cover_cfg = cover_cfg
         self._attr_unique_id = f"{entry.entry_id}_{cover}_azimuth_start"
         self._attr_device_info = device_info
+        if cover_name:
+            self._attr_name = f"{cover_name} Azimut Start"
 
     @property
     def native_value(self) -> int:
@@ -131,17 +142,21 @@ class CoverControlAdvancedAzimuthEndSensor(SensorEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "azimuth_end"
     _attr_native_unit_of_measurement = "°"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(
         self,
         entry: ConfigEntry,
         cover_cfg: dict,
         device_info: DeviceInfo,
+        cover_name: str | None,
     ) -> None:
         cover = cover_cfg[CONF_COVER]
         self._cover_cfg = cover_cfg
         self._attr_unique_id = f"{entry.entry_id}_{cover}_azimuth_end"
         self._attr_device_info = device_info
+        if cover_name:
+            self._attr_name = f"{cover_name} Azimut Ende"
 
     @property
     def native_value(self) -> int:
@@ -154,6 +169,7 @@ class CoverControlAdvancedShadingHeightSensor(SensorEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "shading_height"
     _attr_native_unit_of_measurement = "%"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, entry: ConfigEntry, device_info: DeviceInfo) -> None:
         self._entry = entry
@@ -174,6 +190,7 @@ class CoverControlAdvancedEventSwitchPositionSensor(SensorEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "event_switch_position"
     _attr_native_unit_of_measurement = "%"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, entry: ConfigEntry, device_info: DeviceInfo) -> None:
         self._entry = entry

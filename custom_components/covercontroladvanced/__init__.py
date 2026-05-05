@@ -21,6 +21,17 @@ from .const import (
 from .controller import CoverControlAdvancedController
 
 
+def entity_friendly_name(hass: HomeAssistant, entity_id: str) -> str:
+    """Return the friendly name for an entity, falling back to entity_id."""
+    ent_entry = er.async_get(hass).async_get(entity_id)
+    if ent_entry:
+        return ent_entry.name or ent_entry.original_name or entity_id
+    state = hass.states.get(entity_id)
+    if state:
+        return state.attributes.get("friendly_name") or entity_id
+    return entity_id
+
+
 def build_device_info(hass: HomeAssistant, entry: ConfigEntry) -> DeviceInfo:
     """Return a DeviceInfo for the config entry.
 
@@ -33,9 +44,7 @@ def build_device_info(hass: HomeAssistant, entry: ConfigEntry) -> DeviceInfo:
     device_name = room_name
     if len(covers) == 1:
         cover_id = covers[0].get(CONF_COVER, "")
-        ent_entry = er.async_get(hass).async_get(cover_id)
-        if ent_entry:
-            device_name = ent_entry.name or ent_entry.original_name or room_name
+        device_name = entity_friendly_name(hass, cover_id) or room_name
     return DeviceInfo(
         identifiers={(DOMAIN, entry.entry_id)},
         name=device_name,
@@ -43,7 +52,7 @@ def build_device_info(hass: HomeAssistant, entry: ConfigEntry) -> DeviceInfo:
         manufacturer="Cover Control Advanced",
     )
 
-PLATFORMS = ["sensor", "select"]
+PLATFORMS = ["sensor", "select", "binary_sensor"]
 _LOGGER = logging.getLogger(__name__)
 
 
