@@ -231,8 +231,8 @@ class CoverControlAdvancedController:
             await self._close(cover)
             return
 
-        # 5. Cinema event switch active → close
-        if self.event_on:
+        # 5. Cinema event switch active → close (daytime only; night case handled in step 3)
+        if self.is_day and self.event_on:
             self.last_reason = "cinema_event_close"
             await self._close(cover)
             return
