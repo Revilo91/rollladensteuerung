@@ -8,6 +8,7 @@ from .const import (
     CONF_COVER,
     CONF_DAY_NIGHT_MODE,
     CONF_EVENT_SWITCH,
+    CONF_EVENT_SWITCH_POSITION,
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
     CONF_SUN_AZIMUTH_END,
@@ -58,14 +59,26 @@ _SCHEMA = vol.Schema(
         ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_boolean")
         ),
-        vol.Required(
-            CONF_SHADING_HEIGHT,
-            default="",
-        ): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="input_number")
+        vol.Required(CONF_SHADING_HEIGHT, default=20): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0,
+                max=100,
+                step=1,
+                unit_of_measurement="%",
+                mode=selector.NumberSelectorMode.SLIDER,
+            )
         ),
         vol.Optional(CONF_EVENT_SWITCH): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="switch")
+        ),
+        vol.Optional(CONF_EVENT_SWITCH_POSITION, default=0): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0,
+                max=100,
+                step=1,
+                unit_of_measurement="%",
+                mode=selector.NumberSelectorMode.SLIDER,
+            )
         ),
     }
 )
