@@ -12,8 +12,9 @@
           "room_switch": "Room automation selector (input_select)",
           "shading_hysteresis": "Shading hysteresis sensor",
           "day_night_mode": "Day/night mode (input_boolean)",
-          "shading_height": "Shading height (input_number)",
-          "event_switch": "Event switch for shading events (optional)"
+          "shading_height": "Shading height (%)",
+          "event_switch": "Event switch for shading events (optional)",
+          "event_switch_position": "Target position when event switch is active (%)"
         },
         "data_description": {
           "sun_azimuth_start": "Start angle of the sun azimuth window (0-359).",
@@ -23,6 +24,24 @@
     },
     "abort": {
       "already_configured": "This cover is already configured."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "state": {
+          "initializing": "Initializing",
+          "night_window_shading": "Night + window open → shading height",
+          "door_open": "Door open → open",
+          "event_shading": "Event switch active → target position",
+          "night_closed": "Night + closed → close",
+          "sleep_shading": "Sleep mode → shading height",
+          "room_closed": "Room: closed → close",
+          "day_shading": "Day shading active → shading height",
+          "default_day": "Default: day → open",
+          "default_night": "Default: night → close"
+        }
+      }
     }
   }
 }

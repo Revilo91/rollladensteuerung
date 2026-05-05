@@ -1,5 +1,5 @@
 """Diagnostic sensor – shows the last decision reason."""
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -7,6 +7,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .const import (
     CONF_COVER,
     CONF_EVENT_SWITCH,
+    CONF_EVENT_SWITCH_POSITION,
     CONF_ROOM_SWITCH,
     CONF_SUN_AZIMUTH_END,
     CONF_SUN_AZIMUTH_START,
@@ -28,6 +29,20 @@ async def async_setup_entry(
 class CoverControlAdvancedStatusSensor(SensorEntity):
     _attr_icon = "mdi:roller-shade"
     _attr_should_poll = False
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_translation_key = "status"
+    _attr_options = [
+        "initializing",
+        "night_window_shading",
+        "door_open",
+        "event_shading",
+        "night_closed",
+        "sleep_shading",
+        "room_closed",
+        "day_shading",
+        "default_day",
+        "default_night",
+    ]
 
     def __init__(self, entry: ConfigEntry, ctrl: CoverControlAdvancedController) -> None:
         self._entry = entry
@@ -46,6 +61,7 @@ class CoverControlAdvancedStatusSensor(SensorEntity):
         return {
             "cover": cfg.get(CONF_COVER),
             "event_switch": cfg.get(CONF_EVENT_SWITCH),
+            "event_switch_position": cfg.get(CONF_EVENT_SWITCH_POSITION),
             "room_switch": cfg.get(CONF_ROOM_SWITCH),
             "sun_azimuth_start": cfg.get(CONF_SUN_AZIMUTH_START),
             "sun_azimuth_end": cfg.get(CONF_SUN_AZIMUTH_END),

@@ -12,8 +12,9 @@
           "room_switch": "Raumautomationsauswahl (input_select)",
           "shading_hysteresis": "Beschattungshysterese-Sensor",
           "day_night_mode": "Tag/Nacht-Modus (input_boolean)",
-          "shading_height": "Beschattungshöhe (input_number)",
-          "event_switch": "Event-Schalter für Beschattungsereignisse (optional)"
+          "shading_height": "Beschattungshöhe (%)",
+          "event_switch": "Event-Schalter für Beschattungsereignisse (optional)",
+          "event_switch_position": "Zielposition bei aktivem Event-Schalter (%)"
         },
         "data_description": {
           "sun_azimuth_start": "Startwinkel des Sonnen-Azimutbereichs (0-359).",
@@ -23,6 +24,24 @@
     },
     "abort": {
       "already_configured": "Diese Rolllade ist bereits konfiguriert."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "state": {
+          "initializing": "Initialisierung",
+          "night_window_shading": "Nacht + Fenster offen → Beschattungshöhe",
+          "door_open": "Tür offen → öffnen",
+          "event_shading": "Event-Schalter aktiv → Zielposition",
+          "night_closed": "Nacht + geschlossen → schließen",
+          "sleep_shading": "Schlafmodus → Beschattungshöhe",
+          "room_closed": "Raum: geschlossen → schließen",
+          "day_shading": "Tag-Beschattung aktiv → Beschattungshöhe",
+          "default_day": "Standard: Tag → öffnen",
+          "default_night": "Standard: Nacht → schließen"
+        }
+      }
     }
   }
 }
