@@ -63,6 +63,53 @@ Restart HA.
 8. Day + shading + sun on side     → Shading height
 9. Default                         → Day: Open / Night: Close
 ```
+# System Architecture:
+
+This document describes the hierarchical structure and logical dependencies of the entities for automated roller shutter and blind control (cover control) at the room level.
+
+## 1. Visual Architecture
+```mermaid
+flowchart TD
+    %% Room Level
+    Room["🏠 Room"]
+    
+    subgraph RoomParams [Room Configuration]
+        State["Status Dropdown<br/>(Shading / Forced / Inactive / Closed)"]
+        BaseHeight["Global Shading Height"]
+        Hysteresis["Binary Sensor (Hysteresis)"]
+    end
+
+    subgraph EventSwitch [Event Control]
+        Toggle["Event Switch (ON/OFF)"]
+        EvHeight["Event-specific Height"]
+    end
+
+    %% Links to Room
+    Room --- State
+    Room --- BaseHeight
+    Room --- Hysteresis
+    Room --- Toggle
+    Toggle ---> EvHeight
+
+    %% Stacked Covers using 'docs' shape
+    CoverStack@{ shape: docs, label: "Covers 1..N" }
+    
+    Room ==> CoverStack
+
+    subgraph CoverDetails [Cover Instance Specification]
+        direction TB
+        StartAzimuth["Start Azimuth"]
+        EndAzimuth["End Azimuth"]
+        
+        %% Stacked Contacts using 'docs' shape
+        ContactStack@{ shape: docs, label: "Contacts 1..N" }
+    end
+
+    %% Connect the stack to its shared definition
+    CoverStack --- CoverDetails
+    
+
+```
 
 ## Diagnostic Sensor
 
