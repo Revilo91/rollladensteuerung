@@ -7,6 +7,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .const import (
     CONF_COVER,
     CONF_EVENT_SWITCH,
+    CONF_EVENT_SWITCH_POSITION,
     CONF_ROOM_SWITCH,
     CONF_SUN_AZIMUTH_END,
     CONF_SUN_AZIMUTH_START,
@@ -34,9 +35,8 @@ class CoverControlAdvancedStatusSensor(SensorEntity):
         "initializing",
         "night_window_shading",
         "door_open",
-        "night_event_shading",
+        "event_shading",
         "night_closed",
-        "cinema_close",
         "sleep_shading",
         "room_closed",
         "day_shading",
@@ -61,6 +61,7 @@ class CoverControlAdvancedStatusSensor(SensorEntity):
         return {
             "cover": cfg.get(CONF_COVER),
             "event_switch": cfg.get(CONF_EVENT_SWITCH),
+            "event_switch_position": cfg.get(CONF_EVENT_SWITCH_POSITION),
             "room_switch": cfg.get(CONF_ROOM_SWITCH),
             "sun_azimuth_start": cfg.get(CONF_SUN_AZIMUTH_START),
             "sun_azimuth_end": cfg.get(CONF_SUN_AZIMUTH_END),

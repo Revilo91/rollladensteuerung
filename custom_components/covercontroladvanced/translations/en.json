@@ -13,7 +13,8 @@
           "shading_hysteresis": "Shading hysteresis sensor",
           "day_night_mode": "Day/night mode (input_boolean)",
           "shading_height": "Shading height (input_number)",
-          "event_switch": "Event switch for shading events (optional)"
+          "event_switch": "Event switch for shading events (optional)",
+          "event_switch_position": "Target position when event switch is active (%)"
         },
         "data_description": {
           "sun_azimuth_start": "Start angle of the sun azimuth window (0-359).",
@@ -32,9 +33,8 @@
           "initializing": "Initializing",
           "night_window_shading": "Night + window open → shading height",
           "door_open": "Door open → open",
-          "night_event_shading": "Night event switch → shading height",
+          "event_shading": "Event switch active → target position",
           "night_closed": "Night + closed → close",
-          "cinema_close": "Cinema event switch → close",
           "sleep_shading": "Sleep mode → shading height",
           "room_closed": "Room: closed → close",
           "day_shading": "Day shading active → shading height",

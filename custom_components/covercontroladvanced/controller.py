@@ -11,6 +11,7 @@ from .const import (
     CONF_COVER,
     CONF_DAY_NIGHT_MODE,
     CONF_EVENT_SWITCH,
+    CONF_EVENT_SWITCH_POSITION,
     CONF_ROOM_SWITCH,
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
@@ -174,11 +175,6 @@ class CoverControlAdvancedController:
         return "manuell" in rs or "manual" in rs
 
     @property
-    def _is_cinema_mode(self) -> bool:
-        rs = self._rs.lower()
-        return "kino" in rs or "cinema" in rs
-
-    @property
     def _is_sleep_mode(self) -> bool:
         rs = self._rs.lower()
         return "schlafen" in rs or "sleep" in rs
@@ -211,6 +207,13 @@ class CoverControlAdvancedController:
         return self._is_on(self._cfg.get(CONF_EVENT_SWITCH))
 
     @property
+    def _event_switch_position(self) -> int:
+        try:
+            return int(float(self._cfg.get(CONF_EVENT_SWITCH_POSITION, 0)))
+        except (TypeError, ValueError):
+            return 0
+
+    @property
     def _hysteresis(self) -> bool:
         return self._is_on(self._cfg[CONF_SHADING_HYSTERESIS])
 
@@ -231,10 +234,10 @@ class CoverControlAdvancedController:
             await self._open(cover)
             return
 
-        # 3. Night + event switch + shading active
-        if not self._is_day and self._event_on and self._shading_active:
-            self.last_reason = "night_event_shading"
-            await self._set_pos(cover, self._numeric(self._cfg[CONF_SHADING_HEIGHT]))
+        # 3. Event switch active → configured position (day and night)
+        if self._event_on and self._shading_active:
+            self.last_reason = "event_shading"
+            await self._set_pos(cover, self._event_switch_position)
             return
 
         # 4. Night + closed → close
@@ -243,25 +246,19 @@ class CoverControlAdvancedController:
             await self._close(cover)
             return
 
-        # 5. Event switch close mode
-        if self._event_on and self._is_cinema_mode:
-            self.last_reason = "cinema_close"
-            await self._close(cover)
-            return
-
-        # 6. Day + sleep mode
+        # 5. Day + sleep mode
         if self._is_day and self._is_sleep_mode:
             self.last_reason = "sleep_shading"
             await self._set_pos(cover, self._numeric(self._cfg[CONF_SHADING_HEIGHT]))
             return
 
-        # 7. Room forced closed
+        # 6. Room forced closed
         if self._is_room_closed:
             self.last_reason = "room_closed"
             await self._close(cover)
             return
 
-        # 8. Day + shading active + sun on configured azimuth
+        # 7. Day + shading active + sun on configured azimuth
         window_or_closed_door = self._is_window or not self._is_window_open
 
         shading = (
@@ -275,7 +272,7 @@ class CoverControlAdvancedController:
             await self._set_pos(cover, self._numeric(self._cfg[CONF_SHADING_HEIGHT]))
             return
 
-        # 9. Default fallback
+        # 8. Default fallback
         if self._is_day:
             self.last_reason = "default_day"
             await self._open(cover)

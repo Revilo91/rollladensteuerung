@@ -13,7 +13,8 @@
           "shading_hysteresis": "Beschattungshysterese-Sensor",
           "day_night_mode": "Tag/Nacht-Modus (input_boolean)",
           "shading_height": "Beschattungshöhe (input_number)",
-          "event_switch": "Event-Schalter für Beschattungsereignisse (optional)"
+          "event_switch": "Event-Schalter für Beschattungsereignisse (optional)",
+          "event_switch_position": "Zielposition bei aktivem Event-Schalter (%)"
         },
         "data_description": {
           "sun_azimuth_start": "Startwinkel des Sonnen-Azimutbereichs (0-359).",
@@ -32,9 +33,8 @@
           "initializing": "Initialisierung",
           "night_window_shading": "Nacht + Fenster offen → Beschattungshöhe",
           "door_open": "Tür offen → öffnen",
-          "night_event_shading": "Nacht-Event-Schalter → Beschattungshöhe",
+          "event_shading": "Event-Schalter aktiv → Zielposition",
           "night_closed": "Nacht + geschlossen → schließen",
-          "cinema_close": "Kino-Event-Schalter → schließen",
           "sleep_shading": "Schlafmodus → Beschattungshöhe",
           "room_closed": "Raum: geschlossen → schließen",
           "day_shading": "Tag-Beschattung aktiv → Beschattungshöhe",
