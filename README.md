@@ -72,7 +72,7 @@ This document describes the hierarchical structure and logical dependencies of t
 flowchart TD
     %% Room Level
     Room["🏠 Room"]
-    
+
     subgraph RoomParams [Room Configuration]
         State["Status Dropdown<br/>(Shading / Forced / Inactive / Closed)"]
         BaseHeight["Global Shading Height"]
@@ -93,28 +93,28 @@ flowchart TD
 
     %% Stacked Covers using 'docs' shape
     CoverStack@{ shape: docs, label: "Covers 1..N" }
-    
+
     Room ==> CoverStack
 
     subgraph CoverDetails [Cover Instance Specification]
         direction TB
-        
+
         %% Separate Azimuth Nodes
         StartAz["Start Azimuth"]
         EndAz["End Azimuth"]
-        
+
         %% Stacked Contacts with Device Class
         ContactStack@{ shape: docs, label: "Contacts 1..N" }
         DClass{{"device_class:<br/>door / window"}}
-        
+
         ContactStack --- DClass
     end
 
     %% Connect the stack to its shared definition
     CoverStack --- StartAz
     CoverStack --- EndAz
-    CoverStack --- ContactStack    
- ```  
+    CoverStack --- ContactStack
+ ```
 ## Technical Specification
 - **Entity: Room**
     - **State (Dropdown Helper):** Defines the global operating mode. Valid values: `Shading`, `Forced Shading`, `Inactive`, `Closed`.
@@ -134,6 +134,39 @@ flowchart TD
 ## Diagnostic Sensor
 
 Each instance creates a diagnostic sensor for the configured cover and exposes the last decision reason as its `state`.
+
+## Developer Setup
+
+This repository ships with a Home Assistant dev platform similar to the ComfoClime project.
+
+### Dev Container (recommended)
+
+1. Open this repository in VS Code.
+2. Run `Dev Containers: Reopen in Container`.
+3. Wait for setup scripts to finish.
+4. Open Home Assistant at `http://localhost:8123`.
+
+Detailed docs: `.devcontainer/README.md`
+
+### Local Linux setup
+
+```bash
+bash .devcontainer/setup.sh
+bash .devcontainer/start-ha.sh
+```
+
+Or with the wrapper:
+
+```bash
+bash scripts/start-ha-dev.sh
+```
+
+### Linting
+
+```bash
+bash scripts/lint.sh
+bash scripts/lint.sh --fix
+```
 
 [hacs-badge]: https://img.shields.io/badge/HACS-Custom-orange.svg
 [hacs-url]: https://hacs.xyz

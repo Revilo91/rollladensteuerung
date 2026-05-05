@@ -1,0 +1,21 @@
+default_config:
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - ::1
+    - 172.16.0.0/12
+    - 10.0.0.0/8
+    - 192.168.0.0/16
+  ip_ban_enabled: false
+  login_attempts_threshold: -1
+
+logger:
+  default: info
+  logs:
+    custom_components.covercontroladvanced: debug
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
