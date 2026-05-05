@@ -64,7 +64,7 @@ _SCHEMA = vol.Schema(
         ),
         vol.Required(
             CONF_SHADING_HEIGHT,
-            default="20", min=0, max=100, step=1, unit_of_measurement="%", mode="box"
+            default="",
         ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_number")
         ),
