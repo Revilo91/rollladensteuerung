@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sunGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FDB813;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="windowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E5C8A;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="blindGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E8E8E8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B0B0B0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="#F5F5F5" opacity="0.9"/>
+
+  <!-- Sun with rays -->
+  <g id="sun" transform="translate(140, 140)">
+    <!-- Sun rays -->
+    <g id="rays" opacity="0.7">
+      <line x1="0" y1="-80" x2="0" y2="-100" stroke="url(#sunGradient)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="56.5" y1="-56.5" x2="70.7" y2="-70.7" stroke="url(#sunGradient)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="80" y1="0" x2="100" y2="0" stroke="url(#sunGradient)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="56.5" y1="56.5" x2="70.7" y2="70.7" stroke="url(#sunGradient)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="0" y1="80" x2="0" y2="100" stroke="url(#sunGradient)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="-56.5" y1="56.5" x2="-70.7" y2="70.7" stroke="url(#sunGradient)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="-80" y1="0" x2="-100" y2="0" stroke="url(#sunGradient)" stroke-width="6" stroke-linecap="round"/>
+      <line x1="-56.5" y1="-56.5" x2="-70.7" y2="-70.7" stroke="url(#sunGradient)" stroke-width="6" stroke-linecap="round"/>
+    </g>
+    <!-- Sun core -->
+    <circle cx="0" cy="0" r="50" fill="url(#sunGradient)"/>
+  </g>
+
+  <!-- Window frame -->
+  <g id="window" transform="translate(310, 200)">
+    <!-- Window outer frame -->
+    <rect x="0" y="0" width="160" height="220" rx="8" fill="url(#windowGradient)" stroke="#1A3A5A" stroke-width="4"/>
+
+    <!-- Window inner frame -->
+    <rect x="12" y="12" width="136" height="196" rx="4" fill="#87CEEB" opacity="0.3"/>
+
+    <!-- Vertical divider -->
+    <rect x="76" y="12" width="8" height="196" fill="#1A3A5A" opacity="0.6"/>
+
+    <!-- Horizontal divider -->
+    <rect x="12" y="106" width="136" height="8" fill="#1A3A5A" opacity="0.6"/>
+  </g>
+
+  <!-- Venetian blind slats (partially lowered) -->
+  <g id="blind" transform="translate(310, 200)">
+    <!-- Blind slats - showing automation in action -->
+    <g opacity="0.95">
+      <!-- Top slats (more closed) -->
+      <ellipse cx="80" cy="25" rx="68" ry="4" fill="url(#blindGradient)" stroke="#808080" stroke-width="1"/>
+      <ellipse cx="80" cy="35" rx="68" ry="4" fill="url(#blindGradient)" stroke="#808080" stroke-width="1"/>
+      <ellipse cx="80" cy="45" rx="68" ry="4" fill="url(#blindGradient)" stroke="#808080" stroke-width="1"/>
+      <ellipse cx="80" cy="55" rx="68" ry="4" fill="url(#blindGradient)" stroke="#808080" stroke-width="1"/>
+      <ellipse cx="80" cy="65" rx="68" ry="4" fill="url(#blindGradient)" stroke="#808080" stroke-width="1"/>
+      <ellipse cx="80" cy="75" rx="68" ry="4" fill="url(#blindGradient)" stroke="#808080" stroke-width="1"/>
+      <ellipse cx="80" cy="85" rx="68" ry="4" fill="url(#blindGradient)" stroke="#808080" stroke-width="1"/>
+      <ellipse cx="80" cy="95" rx="68" ry="4" fill="url(#blindGradient)" stroke="#808080" stroke-width="1"/>
+
+      <!-- Middle slats (transitioning, more open) -->
+      <ellipse cx="80" cy="115" rx="68" ry="3" fill="url(#blindGradient)" stroke="#808080" stroke-width="1" opacity="0.8"/>
+      <ellipse cx="80" cy="125" rx="68" ry="2.5" fill="url(#blindGradient)" stroke="#808080" stroke-width="1" opacity="0.6"/>
+      <ellipse cx="80" cy="135" rx="68" ry="2" fill="url(#blindGradient)" stroke="#808080" stroke-width="1" opacity="0.5"/>
+      <ellipse cx="80" cy="145" rx="68" ry="1.5" fill="url(#blindGradient)" stroke="#808080" stroke-width="1" opacity="0.3"/>
+    </g>
+
+    <!-- Blind control string -->
+    <line x1="140" y1="15" x2="140" y2="100" stroke="#606060" stroke-width="2" opacity="0.6"/>
+  </g>
+
+  <!-- House/Room icon (bottom left) -->
+  <g id="house" transform="translate(80, 340)">
+    <!-- House base -->
+    <rect x="0" y="40" width="100" height="80" fill="#5A9BD5" stroke="#2E5C8A" stroke-width="3"/>
+    <!-- Roof -->
+    <path d="M -10 40 L 50 10 L 110 40 Z" fill="#2E5C8A" stroke="#1A3A5A" stroke-width="3"/>
+    <!-- Door -->
+    <rect x="35" y="80" width="30" height="40" fill="#8B4513" stroke="#5C2E0A" stroke-width="2"/>
+    <!-- Window in house -->
+    <rect x="10" y="55" width="20" height="20" fill="#87CEEB" stroke="#2E5C8A" stroke-width="2"/>
+    <rect x="70" y="55" width="20" height="20" fill="#87CEEB" stroke="#2E5C8A" stroke-width="2"/>
+  </g>
+
+  <!-- Automation gear icon (bottom right) -->
+  <g id="gear" transform="translate(380, 380)">
+    <circle cx="0" cy="0" r="35" fill="#5A9BD5" stroke="#2E5C8A" stroke-width="3"/>
+    <!-- Gear teeth -->
+    <rect x="-6" y="-45" width="12" height="15" fill="#5A9BD5" stroke="#2E5C8A" stroke-width="2"/>
+    <rect x="-6" y="30" width="12" height="15" fill="#5A9BD5" stroke="#2E5C8A" stroke-width="2"/>
+    <rect x="-45" y="-6" width="15" height="12" fill="#5A9BD5" stroke="#2E5C8A" stroke-width="2"/>
+    <rect x="30" y="-6" width="15" height="12" fill="#5A9BD5" stroke="#2E5C8A" stroke-width="2"/>
+    <rect x="-35" y="-35" width="12" height="12" fill="#5A9BD5" stroke="#2E5C8A" stroke-width="2" transform="rotate(45)"/>
+    <rect x="23" y="-35" width="12" height="12" fill="#5A9BD5" stroke="#2E5C8A" stroke-width="2" transform="rotate(45)"/>
+    <rect x="-35" y="23" width="12" height="12" fill="#5A9BD5" stroke="#2E5C8A" stroke-width="2" transform="rotate(45)"/>
+    <rect x="23" y="23" width="12" height="12" fill="#5A9BD5" stroke="#2E5C8A" stroke-width="2" transform="rotate(45)"/>
+    <!-- Center hole -->
+    <circle cx="0" cy="0" r="15" fill="#F5F5F5" stroke="#2E5C8A" stroke-width="2"/>
+  </g>
+
+  <!-- Connecting arrow from sun to window (showing sun tracking) -->
+  <g id="tracking-arrow" opacity="0.6">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+        <polygon points="0 0, 10 3, 0 6" fill="#FF8C00" />
+      </marker>
+    </defs>
+    <path d="M 200 160 Q 250 170, 305 185"
+          stroke="#FF8C00"
+          stroke-width="4"
+          fill="none"
+          marker-end="url(#arrowhead)"
+          stroke-dasharray="8,4"/>
+  </g>
+
+  <!-- Title text at bottom -->
+  <text x="256" y="490"
+        font-family="Arial, sans-serif"
+        font-size="32"
+        font-weight="bold"
+        fill="#2E5C8A"
+        text-anchor="middle">Cover Control</text>
+</svg>
