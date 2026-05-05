@@ -18,7 +18,7 @@
         "description": "Add a cover to this room.",
         "data": {
           "cover_entity": "Cover entity",
-          "window_entities": "Window / door contact sensors (binary_sensor)",
+          "window_entities": "Window / door contact sensors",
           "sun_azimuth_start": "Sun azimuth start (degrees)",
           "sun_azimuth_end": "Sun azimuth end (degrees)"
         },
@@ -75,7 +75,7 @@
         "description": "Add another cover to this room.",
         "data": {
           "cover_entity": "Cover entity",
-          "window_entities": "Window / door contact sensors (binary_sensor)",
+          "window_entities": "Window / door contact sensors",
           "sun_azimuth_start": "Sun azimuth start (degrees)",
           "sun_azimuth_end": "Sun azimuth end (degrees)"
         },
@@ -96,7 +96,7 @@
         "description": "Change the selected cover settings.",
         "data": {
           "cover_entity": "Cover entity",
-          "window_entities": "Window / door contact sensors (binary_sensor)",
+          "window_entities": "Window / door contact sensors",
           "sun_azimuth_start": "Sun azimuth start (degrees)",
           "sun_azimuth_end": "Sun azimuth end (degrees)"
         },

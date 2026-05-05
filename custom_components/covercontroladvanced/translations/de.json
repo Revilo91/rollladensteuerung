@@ -18,7 +18,7 @@
         "description": "Füge eine Rolllade zu diesem Raum hinzu.",
         "data": {
           "cover_entity": "Rolllade (Cover-Entität)",
-          "window_entities": "Fenster- / Türkontakte (binary_sensor)",
+          "window_entities": "Fenster- / Türkontakte",
           "sun_azimuth_start": "Sonnen-Azimut Start (Grad)",
           "sun_azimuth_end": "Sonnen-Azimut Ende (Grad)"
         },
@@ -75,7 +75,7 @@
         "description": "Füge diesem Raum eine weitere Rolllade hinzu.",
         "data": {
           "cover_entity": "Rolllade (Cover-Entität)",
-          "window_entities": "Fenster- / Türkontakte (binary_sensor)",
+          "window_entities": "Fenster- / Türkontakte",
           "sun_azimuth_start": "Sonnen-Azimut Start (Grad)",
           "sun_azimuth_end": "Sonnen-Azimut Ende (Grad)"
         },
@@ -96,7 +96,7 @@
         "description": "Ändere die Einstellungen der ausgewählten Rolllade.",
         "data": {
           "cover_entity": "Rolllade (Cover-Entität)",
-          "window_entities": "Fenster- / Türkontakte (binary_sensor)",
+          "window_entities": "Fenster- / Türkontakte",
           "sun_azimuth_start": "Sonnen-Azimut Start (Grad)",
           "sun_azimuth_end": "Sonnen-Azimut Ende (Grad)"
         },
