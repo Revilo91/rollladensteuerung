@@ -45,6 +45,31 @@
   },
   "options": {
     "step": {
+      "init": {
+        "title": "Edit Room Configuration",
+        "description": "Edit room properties and existing covers.",
+        "data": {
+          "selected_action": "Action"
+        },
+        "menu_options": {
+          "room": "Edit room properties",
+          "cover": "Add a cover",
+          "cover_select": "Edit an existing cover",
+          "finish": "Save changes"
+        }
+      },
+      "room": {
+        "title": "Edit Room Properties",
+        "description": "Change room-level settings.",
+        "data": {
+          "room_name": "Room name",
+          "shading_hysteresis": "Shading hysteresis sensor",
+          "day_night_mode": "Day/night mode (input_boolean)",
+          "shading_height": "Shading height (%)",
+          "event_switch": "Event switch (optional)",
+          "event_switch_position": "Target position when event switch is active (%)"
+        }
+      },
       "cover": {
         "title": "Add Cover",
         "description": "Add another cover to this room.",
@@ -59,17 +84,31 @@
           "sun_azimuth_end": "End angle of the sun azimuth window (0-359). If start > end, the range wraps over 0 degrees (e.g. 330 to 30)."
         }
       },
-      "add_more": {
-        "title": "Add another cover?",
-        "description": "You can add more covers to this room or finish.",
-        "menu_options": {
-          "cover": "Add another cover",
-          "finish": "Finish"
+      "cover_select": {
+        "title": "Select Cover",
+        "description": "Choose which existing cover you want to edit.",
+        "data": {
+          "selected_cover": "Cover"
+        }
+      },
+      "cover_edit": {
+        "title": "Edit Cover",
+        "description": "Change the selected cover settings.",
+        "data": {
+          "cover_entity": "Cover entity",
+          "window_entities": "Window / door contact sensors (binary_sensor)",
+          "sun_azimuth_start": "Sun azimuth start (degrees)",
+          "sun_azimuth_end": "Sun azimuth end (degrees)"
+        },
+        "data_description": {
+          "sun_azimuth_start": "Start angle of the sun azimuth window (0-359).",
+          "sun_azimuth_end": "End angle of the sun azimuth window (0-359). If start > end, the range wraps over 0 degrees (e.g. 330 to 30)."
         }
       }
     },
     "error": {
-      "cover_already_added": "This cover has already been added to the room."
+      "cover_already_added": "This cover has already been added to the room.",
+      "cover_not_found": "The selected cover could not be found."
     }
   },
   "entity": {
