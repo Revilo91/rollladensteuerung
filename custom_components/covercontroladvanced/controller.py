@@ -1,12 +1,17 @@
 import logging
 from collections.abc import Callable
+from datetime import timedelta
 from typing import TYPE_CHECKING
 
 from homeassistant.components.cover import DOMAIN as COVER_DOMAIN, CoverEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_SUPPORTED_FEATURES, STATE_ON
 from homeassistant.core import Event, HomeAssistant, callback
-from homeassistant.helpers.event import async_call_later, async_track_state_change_event
+from homeassistant.helpers.event import (
+    async_call_later,
+    async_track_state_change_event,
+    async_track_time_interval,
+)
 
 from .const import (
     CONF_COVER,
@@ -83,6 +88,13 @@ class CoverControlAdvancedController:
         self._unsubs.append(
             async_track_state_change_event(self.hass, watch, _on_state_change)
         )
+        self._unsubs.append(
+            async_track_time_interval(
+                self.hass,
+                lambda _: self.hass.async_create_task(self._evaluate()),
+                timedelta(minutes=1),
+            )
+        )
         _LOGGER.debug(
             "CoverControlAdvancedController for room '%s' started, watching: %s",
             self._cfg.get("room_name", ""),
@@ -121,6 +133,7 @@ class CoverControlAdvancedController:
         cfg = self._cfg
         entities: list[str] = [
             "sun.sun",
+            "sensor.sun_solar_azimuth",
             cfg[CONF_SHADING_HYSTERESIS],
             cfg[CONF_DAY_NIGHT_MODE],
         ]
