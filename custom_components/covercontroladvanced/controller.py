@@ -92,7 +92,6 @@ class CoverControlAdvancedController:
             cfg[CONF_SHADING_HYSTERESIS],
             cfg[CONF_DAY_NIGHT_MODE],
             cfg[CONF_ROOM_SWITCH],
-            cfg[CONF_SHADING_HEIGHT],
         ]
         if v := cfg.get(CONF_EVENT_SWITCH):
             entities.append(v)
@@ -106,12 +105,6 @@ class CoverControlAdvancedController:
 
     def _is_on(self, entity_id: str | None) -> bool:
         return self._state(entity_id) == STATE_ON
-
-    def _numeric(self, entity_id: str | None) -> int:
-        try:
-            return int(float(self._state(entity_id) or 0))
-        except (ValueError, TypeError):
-            return 0
 
     # -------------------------------------------------- computed properties
 
@@ -207,6 +200,13 @@ class CoverControlAdvancedController:
         return self._is_on(self._cfg.get(CONF_EVENT_SWITCH))
 
     @property
+    def _shading_height(self) -> int:
+        try:
+            return int(float(self._cfg.get(CONF_SHADING_HEIGHT, 20)))
+        except (TypeError, ValueError):
+            return 20
+
+    @property
     def _event_switch_position(self) -> int:
         try:
             return int(float(self._cfg.get(CONF_EVENT_SWITCH_POSITION, 0)))
@@ -225,7 +225,7 @@ class CoverControlAdvancedController:
         # 1. Night + window open → night position
         if not self._is_day and self._is_window and self._is_window_open:
             self.last_reason = "night_window_shading"
-            await self._set_pos(cover, self._numeric(self._cfg[CONF_SHADING_HEIGHT]))
+            await self._set_pos(cover, self._shading_height)
             return
 
         # 2. Door open (no window sensor) → open
@@ -249,7 +249,7 @@ class CoverControlAdvancedController:
         # 5. Day + sleep mode
         if self._is_day and self._is_sleep_mode:
             self.last_reason = "sleep_shading"
-            await self._set_pos(cover, self._numeric(self._cfg[CONF_SHADING_HEIGHT]))
+            await self._set_pos(cover, self._shading_height)
             return
 
         # 6. Room forced closed
@@ -269,7 +269,7 @@ class CoverControlAdvancedController:
 
         if self._shading_active and self._is_day and window_or_closed_door and shading:
             self.last_reason = "day_shading"
-            await self._set_pos(cover, self._numeric(self._cfg[CONF_SHADING_HEIGHT]))
+            await self._set_pos(cover, self._shading_height)
             return
 
         # 8. Default fallback

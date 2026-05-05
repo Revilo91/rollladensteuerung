@@ -12,7 +12,7 @@
           "room_switch": "Room automation selector (input_select)",
           "shading_hysteresis": "Shading hysteresis sensor",
           "day_night_mode": "Day/night mode (input_boolean)",
-          "shading_height": "Shading height (input_number)",
+          "shading_height": "Shading height (%)",
           "event_switch": "Event switch for shading events (optional)",
           "event_switch_position": "Target position when event switch is active (%)"
         },

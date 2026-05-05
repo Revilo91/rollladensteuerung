@@ -63,11 +63,14 @@ _SCHEMA = vol.Schema(
         ): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="input_boolean")
         ),
-        vol.Required(
-            CONF_SHADING_HEIGHT,
-            default="",
-        ): selector.EntitySelector(
-            selector.EntitySelectorConfig(domain="input_number")
+        vol.Required(CONF_SHADING_HEIGHT, default=20): selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                min=0,
+                max=100,
+                step=1,
+                unit_of_measurement="%",
+                mode=selector.NumberSelectorMode.SLIDER,
+            )
         ),
         vol.Optional(CONF_EVENT_SWITCH): selector.EntitySelector(
             selector.EntitySelectorConfig(domain="switch")
@@ -86,7 +89,7 @@ _SCHEMA = vol.Schema(
 
 
 class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 4
+    VERSION = 5
 
     async def async_step_user(self, user_input=None):
         if user_input is not None:
