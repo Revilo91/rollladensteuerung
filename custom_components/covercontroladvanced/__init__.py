@@ -6,7 +6,8 @@ import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import area_registry
+from homeassistant.helpers import area_registry, entity_registry as er
+from homeassistant.helpers.entity import DeviceInfo
 
 from .const import (
     CONF_COVER,
@@ -19,7 +20,39 @@ from .const import (
 )
 from .controller import CoverControlAdvancedController
 
-PLATFORMS = ["sensor", "select"]
+
+def entity_friendly_name(hass: HomeAssistant, entity_id: str) -> str:
+    """Return the friendly name for an entity, falling back to entity_id."""
+    ent_entry = er.async_get(hass).async_get(entity_id)
+    if ent_entry:
+        return ent_entry.name or ent_entry.original_name or entity_id
+    state = hass.states.get(entity_id)
+    if state:
+        return state.attributes.get("friendly_name") or entity_id
+    return entity_id
+
+
+def build_device_info(hass: HomeAssistant, entry: ConfigEntry) -> DeviceInfo:
+    """Return a DeviceInfo for the config entry.
+
+    Named after the cover entity's friendly name when the room contains exactly
+    one cover; otherwise named after the room.  The suggested_area is always
+    set to the room name so HA places the device in the right area automatically.
+    """
+    covers = entry.data.get(CONF_COVERS, [])
+    room_name = entry.data.get(CONF_ROOM_NAME, entry.title)
+    device_name = room_name
+    if len(covers) == 1:
+        cover_id = covers[0].get(CONF_COVER, "")
+        device_name = entity_friendly_name(hass, cover_id) or room_name
+    return DeviceInfo(
+        identifiers={(DOMAIN, entry.entry_id)},
+        name=device_name,
+        suggested_area=room_name,
+        manufacturer="Cover Control Advanced",
+    )
+
+PLATFORMS = ["sensor", "select", "binary_sensor"]
 _LOGGER = logging.getLogger(__name__)
 
 

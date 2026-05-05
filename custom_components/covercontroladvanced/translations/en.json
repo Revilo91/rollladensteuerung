@@ -114,6 +114,7 @@
   "entity": {
     "sensor": {
       "status": {
+        "name": "Status",
         "state": {
           "initializing": "Initializing",
           "night_window_shading": "Night + window open → shading height",
@@ -126,6 +127,18 @@
           "default_day": "Default: day → open",
           "default_night": "Default: night → close"
         }
+      },
+      "azimuth_start": {
+        "name": "Sun Azimuth Start"
+      },
+      "azimuth_end": {
+        "name": "Sun Azimuth End"
+      },
+      "shading_height": {
+        "name": "Shading Height"
+      },
+      "event_switch_position": {
+        "name": "Event Switch Position"
       }
     },
     "select": {

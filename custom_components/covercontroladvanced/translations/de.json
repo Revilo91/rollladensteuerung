@@ -114,6 +114,7 @@
   "entity": {
     "sensor": {
       "status": {
+        "name": "Status",
         "state": {
           "initializing": "Initialisierung",
           "night_window_shading": "Nacht + Fenster offen → Beschattungshöhe",
@@ -126,6 +127,18 @@
           "default_day": "Standard: Tag → öffnen",
           "default_night": "Standard: Nacht → schließen"
         }
+      },
+      "azimuth_start": {
+        "name": "Sonnen-Azimut Start"
+      },
+      "azimuth_end": {
+        "name": "Sonnen-Azimut Ende"
+      },
+      "shading_height": {
+        "name": "Beschattungsh\u00f6he"
+      },
+      "event_switch_position": {
+        "name": "Event-Zielposition"
       }
     },
     "select": {
