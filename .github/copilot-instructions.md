@@ -34,3 +34,70 @@
 
 - Führe nach substanziellen Python-Änderungen `ruff check custom_components/` aus.
 - Wenn Änderungen Manifest, Struktur, Übersetzungen oder Home-Assistant-Metadaten betreffen, berücksichtige zusätzlich die CI-Erwartungen aus `.github/workflows/validate.yml`, insbesondere HACS-Validation und Hassfest.
+
+
+## Visual Architecture
+```mermaid
+flowchart TD
+    %% Room Level
+    Room["🏠 Room"]
+    
+    subgraph RoomParams [Room Configuration]
+        State["Status Dropdown<br/>(Shading / Forced / Inactive / Closed)"]
+        BaseHeight["Global Shading Height"]
+        Hysteresis["Binary Sensor (Hysteresis)"]
+    end
+
+    subgraph EventSwitch [Event Control]
+        Toggle["Event Switch (ON/OFF)"]
+        EvHeight{{"Event-specific Height"}}
+    end
+
+    %% Links to Room
+    Room --- State
+    Room --- BaseHeight
+    Room --- Hysteresis
+    Room --- Toggle
+    Toggle ---> EvHeight
+
+    %% Stacked Covers using 'docs' shape
+    CoverStack@{ shape: docs, label: "Covers 1..N" }
+    
+    Room ==> CoverStack
+
+    subgraph CoverDetails [Cover Instance Specification]
+        direction TB
+        
+        %% Separate Azimuth Nodes
+        StartAz["Start Azimuth"]
+        EndAz["End Azimuth"]
+        
+        %% Stacked Contacts with Device Class
+        ContactStack@{ shape: docs, label: "Contacts 1..N" }
+        DClass{{"device_class:<br/>door / window"}}
+        
+        ContactStack --- DClass
+    end
+
+    %% Connect the stack to its shared definition
+    CoverStack --- StartAz
+    CoverStack --- EndAz
+    CoverStack --- ContactStack    
+ ```  
+## Technical Specification (Copilot Context)
+- **Entity: Room**
+    - **State (Dropdown Helper):** Defines the global operating mode. Valid values: `Shading`, `Forced Shading`, `Inactive`, `Closed`.
+    - **Hysteresis (Binary Sensor):** Acts as a buffer to prevent rapid movement due to fluctuating sensor values.
+    - **Shading Height (Value):** The default target position for all covers in the room.
+    - **Event Switch:** A specialized toggle that activates a secondary set of height settings, overriding the default room height.
+    - **1:N Relationship:** A single Room manages a collection of $N$ associated Covers.
+- **Entity: Cover**
+    - **Start Azimuth:** The sun's angle at which shading for this specific cover begins.
+    - **End Azimuth:** The sun's angle at which shading for this specific cover ends.
+    - **1:N Relationship (Contacts):** Every cover is linked to $N$ binary sensors.
+    - **Contact Attribution** (`device_class`):
+        - *Logic Rule:* Contacts primarily serve as safety or lockout conditions (e.g., "lock-out protection") specific to that individual cover.
+        - `window`: Triggers ventilation or prevents closing if open.
+        - `door`: Provides lock-out protection to prevent accidental closure while people are outside.
+
+        
