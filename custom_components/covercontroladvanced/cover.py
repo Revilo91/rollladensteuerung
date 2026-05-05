@@ -49,6 +49,7 @@ class CoverControlAdvancedCoverProxy(CoverEntity):
     """Proxy cover to expose configured covers on the integration device."""
 
     _attr_should_poll = False
+    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -63,6 +64,12 @@ class CoverControlAdvancedCoverProxy(CoverEntity):
         self._attr_name = entity_friendly_name(hass, target_cover_id)
         self._attr_device_info = device_info
         self._unsub = None
+
+    def _refresh_name(self) -> None:
+        """Refresh the proxy name once the source friendly name is available."""
+        resolved_name = entity_friendly_name(self._hass, self._target_cover_id)
+        if resolved_name != self._attr_name:
+            self._attr_name = resolved_name
 
     @property
     def available(self) -> bool:
@@ -120,9 +127,11 @@ class CoverControlAdvancedCoverProxy(CoverEntity):
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
+        self._refresh_name()
 
         @callback
         def _on_state_change(event: Event) -> None:  # noqa: ARG001
+            self._refresh_name()
             self.async_write_ha_state()
 
         self._unsub = async_track_state_change_event(

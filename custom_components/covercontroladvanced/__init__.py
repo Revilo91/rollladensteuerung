@@ -21,14 +21,30 @@ from .const import (
 from .controller import CoverControlAdvancedController
 
 
+def _usable_name(value: str | None, entity_id: str) -> str | None:
+    """Return a cleaned display name unless it is just the raw entity_id."""
+    if not value:
+        return None
+    candidate = value.strip()
+    if not candidate or candidate == entity_id:
+        return None
+    return candidate
+
+
 def entity_friendly_name(hass: HomeAssistant, entity_id: str) -> str:
     """Return the friendly name for an entity, falling back to entity_id."""
-    ent_entry = er.async_get(hass).async_get(entity_id)
-    if ent_entry:
-        return ent_entry.name or ent_entry.original_name or entity_id
     state = hass.states.get(entity_id)
     if state:
-        return state.attributes.get("friendly_name") or entity_id
+        if candidate := _usable_name(state.attributes.get("friendly_name"), entity_id):
+            return candidate
+
+    ent_entry = er.async_get(hass).async_get(entity_id)
+    if ent_entry:
+        if candidate := _usable_name(ent_entry.name, entity_id):
+            return candidate
+        if candidate := _usable_name(ent_entry.original_name, entity_id):
+            return candidate
+
     return entity_id
 
 

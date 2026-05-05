@@ -8,7 +8,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_state_change_event
 
-from . import build_device_info
+from . import build_device_info, entity_friendly_name
 from .const import CONF_EVENT_SWITCH
 
 
@@ -25,6 +25,7 @@ async def async_setup_entry(
     async_add_entities(
         [
             CoverControlAdvancedEventSwitchProxy(
+                hass=hass,
                 entry_id=entry.entry_id,
                 event_switch_entity_id=event_switch,
                 device_info=device_info,
@@ -39,24 +40,37 @@ class CoverControlAdvancedEventSwitchProxy(SwitchEntity):
     _attr_icon = "mdi:light-switch"
     _attr_should_poll = False
     _attr_has_entity_name = True
-    _attr_translation_key = "event_switch_proxy"
 
     def __init__(
         self,
+        hass: HomeAssistant,
         entry_id: str,
         event_switch_entity_id: str,
         device_info: DeviceInfo,
     ) -> None:
+        self._hass = hass
         self._event_switch_entity_id = event_switch_entity_id
         self._attr_unique_id = f"{entry_id}_event_switch_proxy"
+        self._attr_name = entity_friendly_name(
+            self._hass,
+            self._event_switch_entity_id,
+        )
         self._attr_device_info = device_info
         self._unsub = None
 
+    def _refresh_name(self) -> None:
+        """Refresh the proxy name once the source friendly name is available."""
+        resolved_name = entity_friendly_name(self._hass, self._event_switch_entity_id)
+        if resolved_name != self._attr_name:
+            self._attr_name = resolved_name
+
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
+        self._refresh_name()
 
         @callback
         def _on_state_change(event: Event) -> None:  # noqa: ARG001
+            self._refresh_name()
             self.async_write_ha_state()
 
         self._unsub = async_track_state_change_event(
