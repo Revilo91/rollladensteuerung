@@ -36,15 +36,17 @@ async def async_setup_entry(
 class CoverControlAdvancedRoomModeSelect(SelectEntity, RestoreEntity):
     """Select entity representing the room shading mode."""
 
-    _attr_icon = "mdi:blinds"
+    _attr_icon = "mdi:window-shutter-auto"
     _attr_should_poll = False
     _attr_translation_key = "room_mode"
 
-    def __init__(self, entry: ConfigEntry, ctrl: CoverControlAdvancedController) -> None:
+    def __init__(
+        self, entry: ConfigEntry, ctrl: CoverControlAdvancedController
+    ) -> None:
         self._entry = entry
         self._ctrl = ctrl
         room_name = entry.data.get(CONF_ROOM_NAME, entry.entry_id)
-        self._attr_unique_id = f"{DOMAIN}_{room_name}_room_mode"
+        self._attr_unique_id = f"{room_name}_room_mode"
         self._attr_name = f"Cover Control Advanced {room_name} Room Mode"
         self._attr_options = list(ROOM_MODES)
         self._attr_current_option = ROOM_MODE_AUTOMATIC
@@ -55,6 +57,7 @@ class CoverControlAdvancedRoomModeSelect(SelectEntity, RestoreEntity):
         if (last_state := await self.async_get_last_state()) is not None:
             if last_state.state in self._attr_options:
                 self._attr_current_option = last_state.state
+        self.hass.async_create_task(self._ctrl.async_trigger_evaluation())
 
     async def async_select_option(self, option: str) -> None:
         """Handle a new option being selected by the user."""

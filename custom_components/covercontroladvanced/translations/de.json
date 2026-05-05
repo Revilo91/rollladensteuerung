@@ -15,7 +15,85 @@
       },
       "cover": {
         "title": "Rolllade konfigurieren",
-        "description": "Füge die erste Rolllade zu diesem Raum hinzu.",
+        "description": "Füge eine Rolllade zu diesem Raum hinzu.",
+        "data": {
+          "cover_entity": "Rolllade (Cover-Entität)",
+          "window_entities": "Fenster- / Türkontakte (binary_sensor)",
+          "sun_azimuth_start": "Sonnen-Azimut Start (Grad)",
+          "sun_azimuth_end": "Sonnen-Azimut Ende (Grad)"
+        },
+        "data_description": {
+          "sun_azimuth_start": "Startwinkel des Sonnen-Azimutbereichs (0-359).",
+          "sun_azimuth_end": "Endwinkel des Sonnen-Azimutbereichs (0-359). Bei Start > Ende läuft der Bereich über 0 Grad (z.B. 330 bis 30)."
+        }
+      },
+      "add_more": {
+        "title": "Weitere Rolllade hinzufügen?",
+        "description": "Du kannst weitere Rollladen zu diesem Raum hinzufügen oder die Einrichtung abschließen.",
+        "menu_options": {
+          "cover": "Weitere Rolllade hinzufügen",
+          "finish": "Einrichtung abschließen"
+        }
+      }
+    },
+    "error": {
+      "cover_already_added": "Diese Rolllade wurde dem Raum bereits hinzugefügt."
+    },
+    "abort": {
+      "already_configured": "Dieser Raum ist bereits konfiguriert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Raumkonfiguration bearbeiten",
+        "description": "Bearbeite Raumeigenschaften und vorhandene Rollladen.",
+        "data": {
+          "selected_action": "Aktion"
+        },
+        "menu_options": {
+          "room": "Raumeigenschaften bearbeiten",
+          "cover": "Rolllade hinzufügen",
+          "cover_select": "Vorhandene Rolllade bearbeiten",
+          "finish": "Änderungen speichern"
+        }
+      },
+      "room": {
+        "title": "Raumeigenschaften bearbeiten",
+        "description": "Ändere die Einstellungen auf Raumebene.",
+        "data": {
+          "room_name": "Raumname",
+          "shading_hysteresis": "Beschattungshysterese-Sensor",
+          "day_night_mode": "Tag/Nacht-Modus (input_boolean)",
+          "shading_height": "Beschattungshöhe (%)",
+          "event_switch": "Event-Schalter (optional)",
+          "event_switch_position": "Zielposition bei aktivem Event-Schalter (%)"
+        }
+      },
+      "cover": {
+        "title": "Rolllade hinzufügen",
+        "description": "Füge diesem Raum eine weitere Rolllade hinzu.",
+        "data": {
+          "cover_entity": "Rolllade (Cover-Entität)",
+          "window_entities": "Fenster- / Türkontakte (binary_sensor)",
+          "sun_azimuth_start": "Sonnen-Azimut Start (Grad)",
+          "sun_azimuth_end": "Sonnen-Azimut Ende (Grad)"
+        },
+        "data_description": {
+          "sun_azimuth_start": "Startwinkel des Sonnen-Azimutbereichs (0-359).",
+          "sun_azimuth_end": "Endwinkel des Sonnen-Azimutbereichs (0-359). Bei Start > Ende läuft der Bereich über 0 Grad (z.B. 330 bis 30)."
+        }
+      },
+      "cover_select": {
+        "title": "Rolllade auswählen",
+        "description": "Wähle aus, welche vorhandene Rolllade du bearbeiten möchtest.",
+        "data": {
+          "selected_cover": "Rolllade"
+        }
+      },
+      "cover_edit": {
+        "title": "Rolllade bearbeiten",
+        "description": "Ändere die Einstellungen der ausgewählten Rolllade.",
         "data": {
           "cover_entity": "Rolllade (Cover-Entität)",
           "window_entities": "Fenster- / Türkontakte (binary_sensor)",
@@ -28,8 +106,9 @@
         }
       }
     },
-    "abort": {
-      "already_configured": "Dieser Raum ist bereits konfiguriert."
+    "error": {
+      "cover_already_added": "Diese Rolllade wurde dem Raum bereits hinzugefügt.",
+      "cover_not_found": "Die ausgewählte Rolllade wurde nicht gefunden."
     }
   },
   "entity": {

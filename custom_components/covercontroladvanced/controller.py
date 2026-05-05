@@ -1,12 +1,17 @@
 import logging
 from collections.abc import Callable
+from datetime import timedelta
 from typing import TYPE_CHECKING
 
-from homeassistant.components.cover import DOMAIN as COVER_DOMAIN
+from homeassistant.components.cover import DOMAIN as COVER_DOMAIN, CoverEntityFeature
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_ON
+from homeassistant.const import ATTR_SUPPORTED_FEATURES, STATE_ON
 from homeassistant.core import Event, HomeAssistant, callback
-from homeassistant.helpers.event import async_call_later, async_track_state_change_event
+from homeassistant.helpers.event import (
+    async_call_later,
+    async_track_state_change_event,
+    async_track_time_interval,
+)
 
 from .const import (
     CONF_COVER,
@@ -38,6 +43,7 @@ class CoverControlAdvancedController:
         self.hass = hass
         self._cfg = entry.data
         self._unsubs: list[Callable] = []
+        self._listeners: list[Callable[[], None]] = []
         self._shading_off_unsub: Callable | None = None
         self.last_reasons: dict[str, str] = {
             cover_cfg[CONF_COVER]: "initializing"
@@ -68,7 +74,7 @@ class CoverControlAdvancedController:
                     self._shading_off_unsub = async_call_later(
                         self.hass,
                         SHADING_OFF_DELAY,
-                        lambda _: self.hass.async_create_task(self._evaluate()),
+                        lambda _: self.hass.create_task(self._evaluate()),
                     )
                     return
                 if new == STATE_ON and old != STATE_ON:
@@ -77,10 +83,17 @@ class CoverControlAdvancedController:
                         self._shading_off_unsub()
                         self._shading_off_unsub = None
 
-            self.hass.async_create_task(self._evaluate())
+            self.hass.create_task(self._evaluate())
 
         self._unsubs.append(
             async_track_state_change_event(self.hass, watch, _on_state_change)
+        )
+        self._unsubs.append(
+            async_track_time_interval(
+                self.hass,
+                lambda _: self.hass.create_task(self._evaluate()),
+                timedelta(minutes=1),
+            )
         )
         _LOGGER.debug(
             "CoverControlAdvancedController for room '%s' started, watching: %s",
@@ -98,6 +111,21 @@ class CoverControlAdvancedController:
         """Public entry point to trigger a cover re-evaluation (e.g. from the select entity)."""
         await self._evaluate()
 
+    def async_add_listener(self, listener: Callable[[], None]) -> Callable[[], None]:
+        """Register a listener that is notified after each evaluation run."""
+        self._listeners.append(listener)
+
+        def _remove_listener() -> None:
+            if listener in self._listeners:
+                self._listeners.remove(listener)
+
+        return _remove_listener
+
+    @callback
+    def _notify_listeners(self) -> None:
+        for listener in list(self._listeners):
+            listener()
+
     # --------------------------------------------------------------- helpers
 
     @property
@@ -105,6 +133,7 @@ class CoverControlAdvancedController:
         cfg = self._cfg
         entities: list[str] = [
             "sun.sun",
+            "sensor.sun_solar_azimuth",
             cfg[CONF_SHADING_HYSTERESIS],
             cfg[CONF_DAY_NIGHT_MODE],
         ]
@@ -122,6 +151,22 @@ class CoverControlAdvancedController:
 
     def _is_on(self, entity_id: str | None) -> bool:
         return self._state(entity_id) == STATE_ON
+
+    def _supports_feature(
+        self, entity_id: str, feature: CoverEntityFeature
+    ) -> bool:
+        state = self.hass.states.get(entity_id)
+        if state is None:
+            return False
+
+        try:
+            supported = CoverEntityFeature(
+                int(state.attributes.get(ATTR_SUPPORTED_FEATURES, 0))
+            )
+        except (TypeError, ValueError):
+            return False
+
+        return bool(supported & feature)
 
     # -------------------------------------------------- room-level properties
 
@@ -202,6 +247,7 @@ class CoverControlAdvancedController:
         room_mode = self.room_mode
         for cover_cfg in self._cfg.get(CONF_COVERS, []):
             await self._evaluate_cover(cover_cfg, room_mode)
+        self._notify_listeners()
 
     async def _evaluate_cover(self, cover_cfg: dict, room_mode: str) -> None:
         cover = cover_cfg[CONF_COVER]
@@ -270,6 +316,18 @@ class CoverControlAdvancedController:
     # ---------------------------------------------------------- cover calls
 
     async def _set_pos(self, entity_id: str, position: int) -> None:
+        if not self._supports_feature(entity_id, CoverEntityFeature.SET_POSITION):
+            fallback_action = self._close if position < 50 else self._open
+            _LOGGER.debug(
+                "%s does not support set_position(%d), falling back to %s [%s]",
+                entity_id,
+                position,
+                fallback_action.__name__,
+                self.last_reasons.get(entity_id, ""),
+            )
+            await fallback_action(entity_id)
+            return
+
         _LOGGER.debug(
             "%s → set_position(%d) [%s]",
             entity_id,

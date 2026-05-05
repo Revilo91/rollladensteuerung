@@ -1,0 +1,288 @@
+default_config:
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 127.0.0.1
+    - ::1
+    - 172.16.0.0/12
+    - 10.0.0.0/8
+    - 192.168.0.0/16
+  ip_ban_enabled: false
+  login_attempts_threshold: -1
+
+logger:
+  default: info
+  logs:
+    custom_components.covercontroladvanced: debug
+
+input_boolean:
+  day_night_mode:
+    name: Day Night Mode (On = Day)
+    initial: true
+  shading_hysteresis:
+    name: Shading Hysteresis
+    initial: true
+
+  testcover_dev_open:
+    name: Testcover Dev Open
+  testcover_living_open:
+    name: Testcover Living Open
+  testcover_kitchen_open:
+    name: Testcover Kitchen Open
+  testcover_bedroom_open:
+    name: Testcover Bedroom Open
+
+  contact_living_window_left_open:
+    name: Contact Living Window Left Open
+  contact_living_window_right_open:
+    name: Contact Living Window Right Open
+  contact_kitchen_window_open:
+    name: Contact Kitchen Window Open
+  contact_terrace_door_open:
+    name: Contact Terrace Door Open
+  contact_bedroom_window_open:
+    name: Contact Bedroom Window Open
+
+input_number:
+  testcover_dev_position:
+    name: Testcover Dev Position
+    min: 0
+    max: 100
+    step: 1
+  testcover_living_position:
+    name: Testcover Living Position
+    min: 0
+    max: 100
+    step: 1
+  testcover_kitchen_position:
+    name: Testcover Kitchen Position
+    min: 0
+    max: 100
+    step: 1
+  testcover_bedroom_position:
+    name: Testcover Bedroom Position
+    min: 0
+    max: 100
+    step: 1
+
+template:
+  - cover:
+      - name: Testcover Dev
+        unique_id: testcover_dev
+        device_class: shutter
+        position: "{{ states('input_number.testcover_dev_position') | int(0) }}"
+        open_cover:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.testcover_dev_open
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_dev_position
+            data:
+              value: 100
+        close_cover:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.testcover_dev_open
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_dev_position
+            data:
+              value: 0
+        stop_cover:
+          - action: system_log.write
+            data:
+              level: info
+              message: "Testcover Dev stop_cover called"
+        set_cover_position:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_dev_position
+            data:
+              value: "{{ position | int(0) }}"
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ position | int(0) > 0 }}"
+                sequence:
+                  - action: input_boolean.turn_on
+                    target:
+                      entity_id: input_boolean.testcover_dev_open
+            default:
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.testcover_dev_open
+
+      - name: Testcover Living
+        unique_id: testcover_living
+        device_class: shutter
+        position: "{{ states('input_number.testcover_living_position') | int(0) }}"
+        open_cover:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.testcover_living_open
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_living_position
+            data:
+              value: 100
+        close_cover:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.testcover_living_open
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_living_position
+            data:
+              value: 0
+        stop_cover:
+          - action: system_log.write
+            data:
+              level: info
+              message: "Testcover Living stop_cover called"
+        set_cover_position:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_living_position
+            data:
+              value: "{{ position | int(0) }}"
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ position | int(0) > 0 }}"
+                sequence:
+                  - action: input_boolean.turn_on
+                    target:
+                      entity_id: input_boolean.testcover_living_open
+            default:
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.testcover_living_open
+
+      - name: Testcover Kitchen
+        unique_id: testcover_kitchen
+        device_class: shutter
+        position: "{{ states('input_number.testcover_kitchen_position') | int(0) }}"
+        open_cover:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.testcover_kitchen_open
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_kitchen_position
+            data:
+              value: 100
+        close_cover:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.testcover_kitchen_open
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_kitchen_position
+            data:
+              value: 0
+        stop_cover:
+          - action: system_log.write
+            data:
+              level: info
+              message: "Testcover Kitchen stop_cover called"
+        set_cover_position:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_kitchen_position
+            data:
+              value: "{{ position | int(0) }}"
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ position | int(0) > 0 }}"
+                sequence:
+                  - action: input_boolean.turn_on
+                    target:
+                      entity_id: input_boolean.testcover_kitchen_open
+            default:
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.testcover_kitchen_open
+
+      - name: Testcover Bedroom
+        unique_id: testcover_bedroom
+        device_class: shutter
+        position: "{{ states('input_number.testcover_bedroom_position') | int(0) }}"
+        open_cover:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.testcover_bedroom_open
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_bedroom_position
+            data:
+              value: 100
+        close_cover:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.testcover_bedroom_open
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_bedroom_position
+            data:
+              value: 0
+        stop_cover:
+          - action: system_log.write
+            data:
+              level: info
+              message: "Testcover Bedroom stop_cover called"
+        set_cover_position:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.testcover_bedroom_position
+            data:
+              value: "{{ position | int(0) }}"
+          - choose:
+              - conditions:
+                  - condition: template
+                    value_template: "{{ position | int(0) > 0 }}"
+                sequence:
+                  - action: input_boolean.turn_on
+                    target:
+                      entity_id: input_boolean.testcover_bedroom_open
+            default:
+              - action: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.testcover_bedroom_open
+
+    binary_sensor:
+      - name: Shading Hysteresis
+        unique_id: shading_hysteresis
+        device_class: light
+        state: "{{ is_state('input_boolean.shading_hysteresis', 'on') }}"
+
+      - name: Living Window Left Contact
+        unique_id: living_window_left_contact
+        device_class: window
+        state: "{{ is_state('input_boolean.contact_living_window_left_open', 'on') }}"
+
+      - name: Living Window Right Contact
+        unique_id: living_window_right_contact
+        device_class: window
+        state: "{{ is_state('input_boolean.contact_living_window_right_open', 'on') }}"
+
+      - name: Kitchen Window Contact
+        unique_id: kitchen_window_contact
+        device_class: window
+        state: "{{ is_state('input_boolean.contact_kitchen_window_open', 'on') }}"
+
+      - name: Terrace Door Contact
+        unique_id: terrace_door_contact
+        device_class: door
+        state: "{{ is_state('input_boolean.contact_terrace_door_open', 'on') }}"
+
+      - name: Bedroom Window Contact
+        unique_id: bedroom_window_contact
+        device_class: window
+        state: "{{ is_state('input_boolean.contact_bedroom_window_open', 'on') }}"
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
