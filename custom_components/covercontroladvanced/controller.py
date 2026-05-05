@@ -123,11 +123,11 @@ class CoverControlAdvancedController:
             return 225.0
 
     @property
-    def _is_day(self) -> bool:
+    def is_day(self) -> bool:
         return self._is_on(self._cfg[CONF_DAY_NIGHT_MODE])
 
     @property
-    def _is_window(self) -> bool:
+    def is_window(self) -> bool:
         """True if at least one sensor has device_class=window."""
         for eid in self._cfg.get(CONF_WINDOW_ENTITIES) or []:
             s = self.hass.states.get(eid)
@@ -136,49 +136,49 @@ class CoverControlAdvancedController:
         return False
 
     @property
-    def _is_window_open(self) -> bool:
+    def is_window_open(self) -> bool:
         return any(
             self._state(eid) == STATE_ON
             for eid in (self._cfg.get(CONF_WINDOW_ENTITIES) or [])
         )
 
     @property
-    def _rs(self) -> str:
+    def room_switch(self) -> str:
         """Current state of the room input_select."""
         return self._state(self._cfg[CONF_ROOM_SWITCH]) or ""
 
     @property
-    def _shading_active(self) -> bool:
-        rs = self._rs.lower()
+    def shading_active(self) -> bool:
+        rs = self.room_switch.lower()
         return "inaktiv" not in rs and "inactive" not in rs
 
     @property
-    def _shading_forced(self) -> bool:
-        rs = self._rs.lower()
+    def shading_forced(self) -> bool:
+        rs = self.room_switch.lower()
         return "erzwungen" in rs or "forced" in rs
 
     @property
-    def _shading_automatic(self) -> bool:
-        rs = self._rs.lower()
+    def shading_automatic(self) -> bool:
+        rs = self.room_switch.lower()
         return "automatik" in rs or "automatic" in rs
 
     @property
-    def _shading_manual(self) -> bool:
-        rs = self._rs.lower()
+    def shading_manual(self) -> bool:
+        rs = self.room_switch.lower()
         return "manuell" in rs or "manual" in rs
 
     @property
-    def _is_sleep_mode(self) -> bool:
-        rs = self._rs.lower()
+    def is_sleep_mode(self) -> bool:
+        rs = self.room_switch.lower()
         return "schlafen" in rs or "sleep" in rs
 
     @property
-    def _is_room_closed(self) -> bool:
-        rs = self._rs.lower()
+    def is_room_closed(self) -> bool:
+        rs = self.room_switch.lower()
         return "zu" in rs or "closed" in rs
 
     @property
-    def _is_sun_on_window(self) -> bool:
+    def is_sun_on_window(self) -> bool:
         sun = self.hass.states.get("sun.sun")
         if not sun:
             return False
@@ -196,25 +196,25 @@ class CoverControlAdvancedController:
         return azimuth >= start or azimuth <= end
 
     @property
-    def _event_on(self) -> bool:
+    def event_on(self) -> bool:
         return self._is_on(self._cfg.get(CONF_EVENT_SWITCH))
 
     @property
-    def _shading_height(self) -> int:
+    def shading_height(self) -> int:
         try:
             return int(float(self._cfg.get(CONF_SHADING_HEIGHT, 20)))
         except (TypeError, ValueError):
             return 20
 
     @property
-    def _event_switch_position(self) -> int:
+    def event_switch_position(self) -> int:
         try:
             return int(float(self._cfg.get(CONF_EVENT_SWITCH_POSITION, 0)))
         except (TypeError, ValueError):
             return 0
 
     @property
-    def _hysteresis(self) -> bool:
+    def hysteresis(self) -> bool:
         return self._is_on(self._cfg[CONF_SHADING_HYSTERESIS])
 
     # ----------------------------------------------------------- main logic
@@ -223,57 +223,57 @@ class CoverControlAdvancedController:
         cover = self._cfg[CONF_COVER]
 
         # 1. Night + window open → night position
-        if not self._is_day and self._is_window and self._is_window_open:
+        if not self.is_day and self.is_window and self.is_window_open:
             self.last_reason = "night_window_shading"
-            await self._set_pos(cover, self._shading_height)
+            await self._set_pos(cover, self.shading_height)
             return
 
         # 2. Door open (no window sensor) → open
-        if not self._is_window and self._is_window_open:
+        if not self.is_window and self.is_window_open:
             self.last_reason = "door_open"
             await self._open(cover)
             return
 
         # 3. Event switch active → configured position (day and night)
-        if self._event_on and self._shading_active:
+        if self.event_on and self.shading_active:
             self.last_reason = "event_shading"
-            await self._set_pos(cover, self._event_switch_position)
+            await self._set_pos(cover, self.event_switch_position)
             return
 
         # 4. Night + closed → close
-        if not self._is_window_open and not self._is_day:
+        if not self.is_window_open and not self.is_day:
             self.last_reason = "night_closed"
             await self._close(cover)
             return
 
         # 5. Day + sleep mode
-        if self._is_day and self._is_sleep_mode:
+        if self.is_day and self.is_sleep_mode:
             self.last_reason = "sleep_shading"
-            await self._set_pos(cover, self._shading_height)
+            await self._set_pos(cover, self.shading_height)
             return
 
         # 6. Room forced closed
-        if self._is_room_closed:
+        if self.is_room_closed:
             self.last_reason = "room_closed"
             await self._close(cover)
             return
 
         # 7. Day + shading active + sun on configured azimuth
-        window_or_closed_door = self._is_window or not self._is_window_open
+        window_or_closed_door = self.is_window or not self.is_window_open
 
         shading = (
-            (self._hysteresis and self._is_sun_on_window and self._shading_automatic)
-            or (self._is_sun_on_window and self._shading_forced)
-            or self._shading_manual
+            (self.hysteresis and self.is_sun_on_window and self.shading_automatic)
+            or (self.is_sun_on_window and self.shading_forced)
+            or self.shading_manual
         )
 
-        if self._shading_active and self._is_day and window_or_closed_door and shading:
+        if self.shading_active and self.is_day and window_or_closed_door and shading:
             self.last_reason = "day_shading"
-            await self._set_pos(cover, self._shading_height)
+            await self._set_pos(cover, self.shading_height)
             return
 
         # 8. Default fallback
-        if self._is_day:
+        if self.is_day:
             self.last_reason = "default_day"
             await self._open(cover)
         else:
