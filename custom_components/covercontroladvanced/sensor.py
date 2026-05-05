@@ -1,5 +1,5 @@
 """Diagnostic sensor – shows the last decision reason."""
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -28,6 +28,21 @@ async def async_setup_entry(
 class CoverControlAdvancedStatusSensor(SensorEntity):
     _attr_icon = "mdi:roller-shade"
     _attr_should_poll = False
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_translation_key = "status"
+    _attr_options = [
+        "initializing",
+        "night_window_shading",
+        "door_open",
+        "night_event_shading",
+        "night_closed",
+        "cinema_close",
+        "sleep_shading",
+        "room_closed",
+        "day_shading",
+        "default_day",
+        "default_night",
+    ]
 
     def __init__(self, entry: ConfigEntry, ctrl: CoverControlAdvancedController) -> None:
         self._entry = entry

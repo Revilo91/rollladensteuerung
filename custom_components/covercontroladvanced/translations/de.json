@@ -24,5 +24,24 @@
     "abort": {
       "already_configured": "Diese Rolllade ist bereits konfiguriert."
     }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "state": {
+          "initializing": "Initialisierung",
+          "night_window_shading": "Nacht + Fenster offen → Beschattungshöhe",
+          "door_open": "Tür offen → öffnen",
+          "night_event_shading": "Nacht-Event-Schalter → Beschattungshöhe",
+          "night_closed": "Nacht + geschlossen → schließen",
+          "cinema_close": "Kino-Event-Schalter → schließen",
+          "sleep_shading": "Schlafmodus → Beschattungshöhe",
+          "room_closed": "Raum: geschlossen → schließen",
+          "day_shading": "Tag-Beschattung aktiv → Beschattungshöhe",
+          "default_day": "Standard: Tag → öffnen",
+          "default_night": "Standard: Nacht → schließen"
+        }
+      }
+    }
   }
 }

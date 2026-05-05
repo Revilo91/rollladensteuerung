@@ -24,5 +24,24 @@
     "abort": {
       "already_configured": "This cover is already configured."
     }
+  },
+  "entity": {
+    "sensor": {
+      "status": {
+        "state": {
+          "initializing": "Initializing",
+          "night_window_shading": "Night + window open → shading height",
+          "door_open": "Door open → open",
+          "night_event_shading": "Night event switch → shading height",
+          "night_closed": "Night + closed → close",
+          "cinema_close": "Cinema event switch → close",
+          "sleep_shading": "Sleep mode → shading height",
+          "room_closed": "Room: closed → close",
+          "day_shading": "Day shading active → shading height",
+          "default_day": "Default: day → open",
+          "default_night": "Default: night → close"
+        }
+      }
+    }
   }
 }
