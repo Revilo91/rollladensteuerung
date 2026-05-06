@@ -107,10 +107,7 @@ def _cover_schema() -> vol.Schema:
 
 
 def _cover_schema_with_defaults(cover_cfg: dict) -> vol.Schema:
-    sun_azimuth_sensor = cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR)
-    sun_azimuth_sensor_description = (
-        {"suggested_value": sun_azimuth_sensor} if sun_azimuth_sensor else None
-    )
+    existing_sensor = cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR)
     return vol.Schema(
         {
             vol.Required(
@@ -131,7 +128,7 @@ def _cover_schema_with_defaults(cover_cfg: dict) -> vol.Schema:
             ),
             vol.Optional(
                 CONF_SUN_AZIMUTH_SENSOR,
-                description=sun_azimuth_sensor_description,
+                description={"suggested_value": existing_sensor} if existing_sensor else None,
             ): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain="binary_sensor", device_class=["light"]
