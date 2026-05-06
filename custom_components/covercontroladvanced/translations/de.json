@@ -159,10 +159,5 @@
         }
       }
     },
-    "switch": {
-      "event_switch_proxy": {
-        "name": "Event-Schalter"
-      }
-    }
   }
 }
