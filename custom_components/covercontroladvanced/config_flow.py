@@ -4,8 +4,8 @@ from copy import deepcopy
 
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.core import callback
-from homeassistant.helpers import area_registry, selector
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import area_registry, device_registry, entity_registry, selector
 
 from .const import (
     CONF_COVER,
@@ -66,19 +66,88 @@ _ROOM_SCHEMA = vol.Schema(
     }
 )
 
-def _cover_schema() -> vol.Schema:
+def _get_area_entities(
+    hass: HomeAssistant,
+    area_id: str,
+    domain: str,
+    device_classes: list[str] | None = None,
+) -> list[str]:
+    """Return entity IDs assigned to the given area, optionally filtered by device class."""
+    er = entity_registry.async_get(hass)
+    dr = device_registry.async_get(hass)
+    result = []
+    for entry in er.entities.values():
+        if entry.domain != domain or entry.disabled:
+            continue
+        if device_classes is not None:
+            dc = entry.device_class or entry.original_device_class
+            if dc not in device_classes:
+                continue
+        # Resolve the effective area: entity-level assignment overrides device-level.
+        effective_area = entry.area_id
+        if effective_area is None and entry.device_id:
+            device = dr.devices.get(entry.device_id)
+            if device is not None:
+                effective_area = device.area_id
+        if effective_area == area_id:
+            result.append(entry.entity_id)
+    return result
+
+
+def _cover_schema(hass: HomeAssistant | None = None, area_id: str | None = None) -> vol.Schema:
+    covers_in_area: list[str] = (
+        _get_area_entities(hass, area_id, "cover")
+        if hass is not None and area_id is not None
+        else []
+    )
+    windows_in_area: list[str] = (
+        _get_area_entities(hass, area_id, "binary_sensor", ["window", "door"])
+        if hass is not None and area_id is not None
+        else []
+    )
+
+    if covers_in_area:
+        cover_selector = selector.EntitySelector(
+            selector.EntitySelectorConfig(
+                domain="cover",
+                include_entities=covers_in_area,
+            )
+        )
+    else:
+        cover_selector = selector.EntitySelector(
+            selector.EntitySelectorConfig(domain="cover")
+        )
+
+    if windows_in_area:
+        window_selector = selector.EntitySelector(
+            selector.EntitySelectorConfig(
+                domain="binary_sensor",
+                device_class=["window", "door"],
+                multiple=True,
+                include_entities=windows_in_area,
+            )
+        )
+    else:
+        window_selector = selector.EntitySelector(
+            selector.EntitySelectorConfig(
+                domain="binary_sensor",
+                device_class=["window", "door"],
+                multiple=True,
+            )
+        )
+
+    # Pre-select automatically when the area contains exactly one matching entity.
+    cover_key: vol.Required = (
+        vol.Required(CONF_COVER, default=covers_in_area[0])
+        if len(covers_in_area) == 1
+        else vol.Required(CONF_COVER)
+    )
+    window_default: list[str] = windows_in_area if len(windows_in_area) == 1 else []
+
     return vol.Schema(
         {
-            vol.Required(CONF_COVER): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="cover")
-            ),
-            vol.Optional(CONF_WINDOW_ENTITIES, default=[]): selector.EntitySelector(
-                selector.EntitySelectorConfig(
-                    domain="binary_sensor",
-                    device_class=["window", "door"],
-                    multiple=True,
-                )
-            ),
+            cover_key: cover_selector,
+            vol.Optional(CONF_WINDOW_ENTITIES, default=window_default): window_selector,
             vol.Optional(CONF_SUN_AZIMUTH_SENSOR): selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain="binary_sensor", device_class=["light"]
@@ -106,28 +175,78 @@ def _cover_schema() -> vol.Schema:
     )
 
 
-def _cover_schema_with_defaults(cover_cfg: dict) -> vol.Schema:
+def _cover_schema_with_defaults(
+    cover_cfg: dict, hass: HomeAssistant | None = None, area_id: str | None = None
+) -> vol.Schema:
+    covers_in_area: list[str] = (
+        _get_area_entities(hass, area_id, "cover")
+        if hass is not None and area_id is not None
+        else []
+    )
+    windows_in_area: list[str] = (
+        _get_area_entities(hass, area_id, "binary_sensor", ["window", "door"])
+        if hass is not None and area_id is not None
+        else []
+    )
+
+    # Always keep the currently configured entities visible in the dropdowns.
+    current_cover = cover_cfg.get(CONF_COVER, "")
+    if covers_in_area and current_cover and current_cover not in covers_in_area:
+        filtered_covers = [current_cover, *covers_in_area]
+    else:
+        filtered_covers = covers_in_area
+
+    current_windows: list[str] = cover_cfg.get(CONF_WINDOW_ENTITIES, [])
+    if windows_in_area:
+        extra = [e for e in current_windows if e not in windows_in_area]
+        filtered_windows = [*extra, *windows_in_area] if extra else windows_in_area
+    else:
+        filtered_windows = windows_in_area
+
+    if filtered_covers:
+        cover_selector = selector.EntitySelector(
+            selector.EntitySelectorConfig(
+                domain="cover",
+                include_entities=filtered_covers,
+            )
+        )
+    else:
+        cover_selector = selector.EntitySelector(
+            selector.EntitySelectorConfig(domain="cover")
+        )
+
+    if filtered_windows:
+        window_selector = selector.EntitySelector(
+            selector.EntitySelectorConfig(
+                domain="binary_sensor",
+                device_class=["window", "door"],
+                multiple=True,
+                include_entities=filtered_windows,
+            )
+        )
+    else:
+        window_selector = selector.EntitySelector(
+            selector.EntitySelectorConfig(
+                domain="binary_sensor",
+                device_class=["window", "door"],
+                multiple=True,
+            )
+        )
+
     existing_sensor = cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR)
     existing_start = cover_cfg.get(CONF_SUN_AZIMUTH_START)
     existing_end = cover_cfg.get(CONF_SUN_AZIMUTH_END)
+
     return vol.Schema(
         {
             vol.Required(
                 CONF_COVER,
                 default=cover_cfg.get(CONF_COVER, ""),
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(domain="cover")
-            ),
+            ): cover_selector,
             vol.Optional(
                 CONF_WINDOW_ENTITIES,
                 default=cover_cfg.get(CONF_WINDOW_ENTITIES, []),
-            ): selector.EntitySelector(
-                selector.EntitySelectorConfig(
-                    domain="binary_sensor",
-                    device_class=["window", "door"],
-                    multiple=True,
-                )
-            ),
+            ): window_selector,
             vol.Optional(
                 CONF_SUN_AZIMUTH_SENSOR,
                 description={"suggested_value": existing_sensor} if existing_sensor else None,
@@ -278,6 +397,7 @@ class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         self._room_data: dict = {}
         self._covers: list[dict] = []
+        self._area_id: str | None = None
 
     @staticmethod
     @callback
@@ -289,6 +409,7 @@ class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         if user_input is not None:
             raw_room_name = user_input[CONF_ROOM_NAME]
+            self._area_id = raw_room_name
             self._room_data = {
                 **user_input,
                 CONF_ROOM_NAME: _resolve_room_name(self, raw_room_name),
@@ -311,7 +432,7 @@ class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="cover",
-            data_schema=_cover_schema(),
+            data_schema=_cover_schema(self.hass, self._area_id),
             errors=errors,
         )
 
@@ -333,6 +454,13 @@ class CoverControlAdvancedOptionsFlow(config_entries.OptionsFlowWithConfigEntry)
         self._working_data: dict = deepcopy(dict(config_entry.data))
         self._selected_cover: str | None = None
         self._dirty = False
+
+    def _get_area_id(self) -> str | None:
+        """Return the area ID for the room configured in this entry, if any."""
+        room_name = self._working_data.get(CONF_ROOM_NAME, "")
+        ar = area_registry.async_get(self.hass)
+        area = ar.async_get_area_by_name(room_name)
+        return area.id if area is not None else None
 
     async def async_step_init(self, user_input=None):
         return self.async_show_menu(
@@ -372,7 +500,7 @@ class CoverControlAdvancedOptionsFlow(config_entries.OptionsFlowWithConfigEntry)
 
         return self.async_show_form(
             step_id="cover",
-            data_schema=_cover_schema(),
+            data_schema=_cover_schema(self.hass, self._get_area_id()),
             errors=errors,
         )
 
@@ -430,7 +558,9 @@ class CoverControlAdvancedOptionsFlow(config_entries.OptionsFlowWithConfigEntry)
 
         return self.async_show_form(
             step_id="cover_edit",
-            data_schema=_cover_schema_with_defaults(selected_cover_cfg),
+            data_schema=_cover_schema_with_defaults(
+                selected_cover_cfg, self.hass, self._get_area_id()
+            ),
             errors=errors,
         )
 
