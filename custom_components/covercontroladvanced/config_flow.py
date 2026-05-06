@@ -17,6 +17,7 @@ from .const import (
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
     CONF_SUN_AZIMUTH_END,
+    CONF_SUN_AZIMUTH_SENSOR,
     CONF_SUN_AZIMUTH_START,
     CONF_WINDOW_ENTITIES,
     DOMAIN,
@@ -78,6 +79,11 @@ def _cover_schema() -> vol.Schema:
                     multiple=True,
                 )
             ),
+            vol.Optional(CONF_SUN_AZIMUTH_SENSOR): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="binary_sensor", device_class=["light"]
+                )
+            ),
             vol.Required(CONF_SUN_AZIMUTH_START, default=135): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0,
@@ -101,6 +107,10 @@ def _cover_schema() -> vol.Schema:
 
 
 def _cover_schema_with_defaults(cover_cfg: dict) -> vol.Schema:
+    sun_azimuth_sensor = cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR)
+    sun_azimuth_sensor_description = (
+        {"suggested_value": sun_azimuth_sensor} if sun_azimuth_sensor else None
+    )
     return vol.Schema(
         {
             vol.Required(
@@ -117,6 +127,14 @@ def _cover_schema_with_defaults(cover_cfg: dict) -> vol.Schema:
                     domain="binary_sensor",
                     device_class=["window", "door"],
                     multiple=True,
+                )
+            ),
+            vol.Optional(
+                CONF_SUN_AZIMUTH_SENSOR,
+                description=sun_azimuth_sensor_description,
+            ): selector.EntitySelector(
+                selector.EntitySelectorConfig(
+                    domain="binary_sensor", device_class=["light"]
                 )
             ),
             vol.Required(
@@ -278,6 +296,8 @@ class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_cover(self, user_input=None):
         errors: dict[str, str] = {}
         if user_input is not None:
+            if not user_input.get(CONF_SUN_AZIMUTH_SENSOR):
+                user_input.pop(CONF_SUN_AZIMUTH_SENSOR, None)
             if _cover_already_added(self._covers, user_input[CONF_COVER]):
                 errors["base"] = "cover_already_added"
             else:
@@ -337,6 +357,8 @@ class CoverControlAdvancedOptionsFlow(config_entries.OptionsFlowWithConfigEntry)
         errors: dict[str, str] = {}
         covers = self._working_data.get(CONF_COVERS, [])
         if user_input is not None:
+            if not user_input.get(CONF_SUN_AZIMUTH_SENSOR):
+                user_input.pop(CONF_SUN_AZIMUTH_SENSOR, None)
             if _cover_already_added(covers, user_input[CONF_COVER]):
                 errors["base"] = "cover_already_added"
             else:
@@ -389,6 +411,8 @@ class CoverControlAdvancedOptionsFlow(config_entries.OptionsFlowWithConfigEntry)
         errors: dict[str, str] = {}
         if user_input is not None:
             new_cover_entity = user_input[CONF_COVER]
+            if not user_input.get(CONF_SUN_AZIMUTH_SENSOR):
+                user_input.pop(CONF_SUN_AZIMUTH_SENSOR, None)
             duplicate_cover = any(
                 i != selected_idx and c[CONF_COVER] == new_cover_entity
                 for i, c in enumerate(covers)

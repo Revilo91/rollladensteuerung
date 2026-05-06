@@ -22,6 +22,7 @@ from .const import (
     CONF_SHADING_HEIGHT,
     CONF_SHADING_HYSTERESIS,
     CONF_SUN_AZIMUTH_END,
+    CONF_SUN_AZIMUTH_SENSOR,
     CONF_SUN_AZIMUTH_START,
     CONF_WINDOW_ENTITIES,
     ROOM_MODE_ACTIVE,
@@ -141,6 +142,8 @@ class CoverControlAdvancedController:
             entities.append(v)
         for cover_cfg in cfg.get(CONF_COVERS, []):
             entities.extend(cover_cfg.get(CONF_WINDOW_ENTITIES) or [])
+            if v := cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR):
+                entities.append(v)
         return [e for e in entities if e]
 
     def _state(self, entity_id: str | None) -> str | None:
@@ -221,7 +224,16 @@ class CoverControlAdvancedController:
         )
 
     def _cover_sun_on_window(self, cover_cfg: dict) -> bool:
-        """True if the sun azimuth is within the range configured for this cover."""
+        """True if the sun is shining on this cover.
+
+        When a light binary sensor is configured for this cover, its state
+        (on = sun present) is used directly.  Otherwise the sun azimuth range
+        is evaluated.
+        """
+        light_sensor = cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR)
+        if light_sensor:
+            return self._is_on(light_sensor)
+
         sun = self.hass.states.get("sun.sun")
         if not sun:
             return False
