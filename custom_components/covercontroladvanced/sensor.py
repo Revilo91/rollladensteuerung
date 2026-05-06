@@ -4,7 +4,7 @@ from collections.abc import Callable
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_ON
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_state_change_event
@@ -277,8 +277,12 @@ class CoverControlAdvancedCoverStateSensor(SensorEntity):
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
         self._unsubscribe = async_track_state_change_event(
-            self.hass, [self._cover_id], lambda _: self.async_write_ha_state()
+            self.hass, [self._cover_id], self._handle_state_change
         )
+
+    @callback
+    def _handle_state_change(self, _event) -> None:
+        self.async_write_ha_state()
 
     async def async_will_remove_from_hass(self) -> None:
         if self._unsubscribe is not None:
@@ -331,8 +335,12 @@ class CoverControlAdvancedContactSensor(SensorEntity):
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
         self._unsubscribe = async_track_state_change_event(
-            self.hass, [self._contact_id], lambda _: self.async_write_ha_state()
+            self.hass, [self._contact_id], self._handle_state_change
         )
+
+    @callback
+    def _handle_state_change(self, _event) -> None:
+        self.async_write_ha_state()
 
     async def async_will_remove_from_hass(self) -> None:
         if self._unsubscribe is not None:
