@@ -145,6 +145,16 @@
       },
       "event_switch_position": {
         "name": "Event Switch Position"
+      },
+      "cover_position": {
+        "name": "Cover Position"
+      },
+      "contact_state": {
+        "name": "Contact",
+        "state": {
+          "open": "Open",
+          "closed": "Closed"
+        }
       }
     },
     "select": {

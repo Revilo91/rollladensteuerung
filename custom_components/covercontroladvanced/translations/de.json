@@ -145,6 +145,16 @@
       },
       "event_switch_position": {
         "name": "Event-Zielposition"
+      },
+      "cover_position": {
+        "name": "Rollladenposition"
+      },
+      "contact_state": {
+        "name": "Kontakt",
+        "state": {
+          "open": "Offen",
+          "closed": "Geschlossen"
+        }
       }
     },
     "select": {
