@@ -142,15 +142,42 @@ class CoverControlAdvancedSunSensorSensor(SensorEntity):
         cover_name: str | None,
     ) -> None:
         cover = cover_cfg[CONF_COVER]
-        self._cover_cfg = cover_cfg
+        self._sun_sensor_id: str = cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR, "")
+        self._unsubscribe: Callable[[], None] | None = None
         self._attr_unique_id = f"{entry.entry_id}_{cover}_sun_sensor"
         self._attr_device_info = device_info
         if cover_name:
             self._attr_name = f"{cover_name} Sonnenlichtsensor"
 
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        if self._sun_sensor_id:
+            self._unsubscribe = async_track_state_change_event(
+                self.hass, [self._sun_sensor_id], self._handle_state_change
+            )
+
+    @callback
+    def _handle_state_change(self, _event) -> None:
+        self.async_write_ha_state()
+
+    async def async_will_remove_from_hass(self) -> None:
+        if self._unsubscribe is not None:
+            self._unsubscribe()
+            self._unsubscribe = None
+        await super().async_will_remove_from_hass()
+
     @property
     def native_value(self) -> str | None:
-        return self._cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR)
+        if not self._sun_sensor_id:
+            return None
+        state = self.hass.states.get(self._sun_sensor_id)
+        if state is None:
+            return None
+        return state.state
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        return {"entity_id": self._sun_sensor_id} if self._sun_sensor_id else {}
 
 
 class CoverControlAdvancedAzimuthStartSensor(SensorEntity):

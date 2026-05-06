@@ -5,7 +5,12 @@ from copy import deepcopy
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import area_registry, device_registry, entity_registry, selector
+from homeassistant.helpers import (
+    area_registry,
+    device_registry,
+    entity_registry,
+    selector,
+)
 
 from .const import (
     CONF_COVER,
