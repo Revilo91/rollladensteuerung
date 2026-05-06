@@ -3,9 +3,11 @@ from collections.abc import Callable
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import STATE_ON
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.event import async_track_state_change_event
 
 from . import build_device_info, entity_friendly_name
 from .const import (
@@ -18,6 +20,7 @@ from .const import (
     CONF_SUN_AZIMUTH_END,
     CONF_SUN_AZIMUTH_SENSOR,
     CONF_SUN_AZIMUTH_START,
+    CONF_WINDOW_ENTITIES,
     DOMAIN,
 )
 from .controller import CoverControlAdvancedController
@@ -49,6 +52,16 @@ async def async_setup_entry(
         entities.append(
             CoverControlAdvancedAzimuthEndSensor(entry, cover_cfg, device_info, c_name)
         )
+        entities.append(
+            CoverControlAdvancedCoverStateSensor(entry, cover_cfg, device_info, c_name)
+        )
+        for contact_id in cover_cfg.get(CONF_WINDOW_ENTITIES) or []:
+            contact_name = entity_friendly_name(hass, contact_id)
+            entities.append(
+                CoverControlAdvancedContactSensor(
+                    entry, contact_id, device_info, contact_name
+                )
+            )
     entities.append(CoverControlAdvancedShadingHeightSensor(entry, device_info))
     if entry.data.get(CONF_EVENT_SWITCH):
         entities.append(
@@ -234,3 +247,115 @@ class CoverControlAdvancedEventSwitchPositionSensor(SensorEntity):
             return int(float(self._entry.data.get(CONF_EVENT_SWITCH_POSITION, 0)))
         except (TypeError, ValueError):
             return 0
+
+
+class CoverControlAdvancedCoverStateSensor(SensorEntity):
+    """Diagnostic sensor showing the live position of the assigned cover entity."""
+
+    _attr_icon = "mdi:window-shutter"
+    _attr_should_poll = False
+    _attr_has_entity_name = True
+    _attr_translation_key = "cover_position"
+    _attr_native_unit_of_measurement = "%"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self,
+        entry: ConfigEntry,
+        cover_cfg: dict,
+        device_info: DeviceInfo,
+        cover_name: str | None,
+    ) -> None:
+        cover = cover_cfg[CONF_COVER]
+        self._cover_id = cover
+        self._unsubscribe: Callable[[], None] | None = None
+        self._attr_unique_id = f"{entry.entry_id}_{cover}_cover_position"
+        self._attr_device_info = device_info
+        if cover_name:
+            self._attr_name = f"{cover_name} Position"
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self._unsubscribe = async_track_state_change_event(
+            self.hass, [self._cover_id], lambda _: self.async_write_ha_state()
+        )
+
+    async def async_will_remove_from_hass(self) -> None:
+        if self._unsubscribe is not None:
+            self._unsubscribe()
+            self._unsubscribe = None
+        await super().async_will_remove_from_hass()
+
+    @property
+    def native_value(self) -> int | None:
+        state = self.hass.states.get(self._cover_id)
+        if state is None:
+            return None
+        pos = state.attributes.get("current_position")
+        try:
+            return int(pos)
+        except (TypeError, ValueError):
+            return None
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        state = self.hass.states.get(self._cover_id)
+        if state is None:
+            return {}
+        return {"state": state.state}
+
+
+class CoverControlAdvancedContactSensor(SensorEntity):
+    """Diagnostic sensor showing the live open/closed state of a contact sensor."""
+
+    _attr_should_poll = False
+    _attr_has_entity_name = True
+    _attr_translation_key = "contact_state"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["open", "closed"]
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self,
+        entry: ConfigEntry,
+        contact_entity_id: str,
+        device_info: DeviceInfo,
+        contact_name: str,
+    ) -> None:
+        self._contact_id = contact_entity_id
+        self._unsubscribe: Callable[[], None] | None = None
+        self._attr_unique_id = f"{entry.entry_id}_{contact_entity_id}_contact_state"
+        self._attr_device_info = device_info
+        self._attr_name = contact_name
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        self._unsubscribe = async_track_state_change_event(
+            self.hass, [self._contact_id], lambda _: self.async_write_ha_state()
+        )
+
+    async def async_will_remove_from_hass(self) -> None:
+        if self._unsubscribe is not None:
+            self._unsubscribe()
+            self._unsubscribe = None
+        await super().async_will_remove_from_hass()
+
+    @property
+    def icon(self) -> str:
+        state = self.hass.states.get(self._contact_id)
+        if state is None:
+            return "mdi:help-circle-outline"
+        device_class = state.attributes.get("device_class")
+        is_open = state.state == STATE_ON
+        if device_class == "window":
+            return "mdi:window-open" if is_open else "mdi:window-closed"
+        if device_class == "door":
+            return "mdi:door-open" if is_open else "mdi:door"
+        return "mdi:toggle-switch" if is_open else "mdi:toggle-switch-off"
+
+    @property
+    def native_value(self) -> str | None:
+        state = self.hass.states.get(self._contact_id)
+        if state is None:
+            return None
+        return "open" if state.state == STATE_ON else "closed"
