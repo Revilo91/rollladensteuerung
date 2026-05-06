@@ -14,13 +14,28 @@ jobs:
   validate-hacs:
     name: HACS Validation
     runs-on: ubuntu-latest
+    permissions:
+      administration: write
     steps:
       - uses: actions/checkout@v4
+      - name: Set repository description and topics
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              description: 'Advanced cover/shutter control integration for Home Assistant'
+            });
+            await github.rest.repos.replaceAllTopics({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              names: ['home-assistant', 'hacs', 'home-automation', 'custom-integration', 'cover']
+            });
       - name: HACS Action
         uses: hacs/action@22.5.0
         with:
           category: integration
-          ignore: topics description
 
   validate-hassfest:
     name: Hassfest
