@@ -19,10 +19,12 @@
         "data": {
           "cover_entity": "Rolllade (Cover-Entität)",
           "window_entities": "Fenster- / Türkontakte",
+          "sun_azimuth_sensor": "Sonnenlichtsensor (optional)",
           "sun_azimuth_start": "Sonnen-Azimut Start (Grad)",
           "sun_azimuth_end": "Sonnen-Azimut Ende (Grad)"
         },
         "data_description": {
+          "sun_azimuth_sensor": "Falls gesetzt, bestimmt dieser Binärsensor (device_class: light), ob die Sonne auf diese Rolllade scheint. Der Azimutbereich wird ignoriert, wenn ein Sensor konfiguriert ist.",
           "sun_azimuth_start": "Startwinkel des Sonnen-Azimutbereichs (0-359).",
           "sun_azimuth_end": "Endwinkel des Sonnen-Azimutbereichs (0-359). Bei Start > Ende läuft der Bereich über 0 Grad (z.B. 330 bis 30)."
         }
@@ -76,10 +78,12 @@
         "data": {
           "cover_entity": "Rolllade (Cover-Entität)",
           "window_entities": "Fenster- / Türkontakte",
+          "sun_azimuth_sensor": "Sonnenlichtsensor (optional)",
           "sun_azimuth_start": "Sonnen-Azimut Start (Grad)",
           "sun_azimuth_end": "Sonnen-Azimut Ende (Grad)"
         },
         "data_description": {
+          "sun_azimuth_sensor": "Falls gesetzt, bestimmt dieser Binärsensor (device_class: light), ob die Sonne auf diese Rolllade scheint. Der Azimutbereich wird ignoriert, wenn ein Sensor konfiguriert ist.",
           "sun_azimuth_start": "Startwinkel des Sonnen-Azimutbereichs (0-359).",
           "sun_azimuth_end": "Endwinkel des Sonnen-Azimutbereichs (0-359). Bei Start > Ende läuft der Bereich über 0 Grad (z.B. 330 bis 30)."
         }
@@ -97,10 +101,12 @@
         "data": {
           "cover_entity": "Rolllade (Cover-Entität)",
           "window_entities": "Fenster- / Türkontakte",
+          "sun_azimuth_sensor": "Sonnenlichtsensor (optional)",
           "sun_azimuth_start": "Sonnen-Azimut Start (Grad)",
           "sun_azimuth_end": "Sonnen-Azimut Ende (Grad)"
         },
         "data_description": {
+          "sun_azimuth_sensor": "Falls gesetzt, bestimmt dieser Binärsensor (device_class: light), ob die Sonne auf diese Rolllade scheint. Der Azimutbereich wird ignoriert, wenn ein Sensor konfiguriert ist.",
           "sun_azimuth_start": "Startwinkel des Sonnen-Azimutbereichs (0-359).",
           "sun_azimuth_end": "Endwinkel des Sonnen-Azimutbereichs (0-359). Bei Start > Ende läuft der Bereich über 0 Grad (z.B. 330 bis 30)."
         }
