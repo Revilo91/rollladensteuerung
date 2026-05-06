@@ -228,11 +228,16 @@ class CoverControlAdvancedController:
 
         When a light binary sensor is configured for this cover, its state
         (on = sun present) is used directly.  Otherwise the sun azimuth range
-        is evaluated.
+        is evaluated.  Returns False when neither is configured.
         """
         light_sensor = cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR)
         if light_sensor:
             return self._is_on(light_sensor)
+
+        start_raw = cover_cfg.get(CONF_SUN_AZIMUTH_START)
+        end_raw = cover_cfg.get(CONF_SUN_AZIMUTH_END)
+        if start_raw is None or end_raw is None:
+            return False
 
         sun = self.hass.states.get("sun.sun")
         if not sun:
@@ -244,8 +249,8 @@ class CoverControlAdvancedController:
             return False
 
         try:
-            start = float(cover_cfg.get(CONF_SUN_AZIMUTH_START, 135)) % 360
-            end = float(cover_cfg.get(CONF_SUN_AZIMUTH_END, 225)) % 360
+            start = float(start_raw) % 360
+            end = float(end_raw) % 360
         except (TypeError, ValueError):
             return False
 

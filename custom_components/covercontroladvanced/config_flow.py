@@ -84,7 +84,7 @@ def _cover_schema() -> vol.Schema:
                     domain="binary_sensor", device_class=["light"]
                 )
             ),
-            vol.Required(CONF_SUN_AZIMUTH_START, default=135): selector.NumberSelector(
+            vol.Optional(CONF_SUN_AZIMUTH_START): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0,
                     max=359,
@@ -93,7 +93,7 @@ def _cover_schema() -> vol.Schema:
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
-            vol.Required(CONF_SUN_AZIMUTH_END, default=225): selector.NumberSelector(
+            vol.Optional(CONF_SUN_AZIMUTH_END): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0,
                     max=359,
@@ -108,6 +108,8 @@ def _cover_schema() -> vol.Schema:
 
 def _cover_schema_with_defaults(cover_cfg: dict) -> vol.Schema:
     existing_sensor = cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR)
+    existing_start = cover_cfg.get(CONF_SUN_AZIMUTH_START)
+    existing_end = cover_cfg.get(CONF_SUN_AZIMUTH_END)
     return vol.Schema(
         {
             vol.Required(
@@ -134,9 +136,9 @@ def _cover_schema_with_defaults(cover_cfg: dict) -> vol.Schema:
                     domain="binary_sensor", device_class=["light"]
                 )
             ),
-            vol.Required(
+            vol.Optional(
                 CONF_SUN_AZIMUTH_START,
-                default=cover_cfg.get(CONF_SUN_AZIMUTH_START, 135),
+                description={"suggested_value": existing_start} if existing_start is not None else None,
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0,
@@ -146,9 +148,9 @@ def _cover_schema_with_defaults(cover_cfg: dict) -> vol.Schema:
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
-            vol.Required(
+            vol.Optional(
                 CONF_SUN_AZIMUTH_END,
-                default=cover_cfg.get(CONF_SUN_AZIMUTH_END, 225),
+                description={"suggested_value": existing_end} if existing_end is not None else None,
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0,
@@ -258,6 +260,13 @@ def _cover_already_added(covers: list[dict], cover_entity: str) -> bool:
     return any(cover_cfg[CONF_COVER] == cover_entity for cover_cfg in covers)
 
 
+def _clean_cover_input(user_input: dict) -> None:
+    """Strip optional cover fields that were left empty."""
+    for key in (CONF_SUN_AZIMUTH_SENSOR, CONF_SUN_AZIMUTH_START, CONF_SUN_AZIMUTH_END):
+        if user_input.get(key) is None:
+            user_input.pop(key, None)
+
+
 def _resolve_room_name(flow: config_entries.ConfigFlow, value: str) -> str:
     area = area_registry.async_get(flow.hass).async_get_area(value)
     return area.name if area is not None else value
@@ -293,8 +302,7 @@ class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_cover(self, user_input=None):
         errors: dict[str, str] = {}
         if user_input is not None:
-            if not user_input.get(CONF_SUN_AZIMUTH_SENSOR):
-                user_input.pop(CONF_SUN_AZIMUTH_SENSOR, None)
+            _clean_cover_input(user_input)
             if _cover_already_added(self._covers, user_input[CONF_COVER]):
                 errors["base"] = "cover_already_added"
             else:
@@ -354,8 +362,7 @@ class CoverControlAdvancedOptionsFlow(config_entries.OptionsFlowWithConfigEntry)
         errors: dict[str, str] = {}
         covers = self._working_data.get(CONF_COVERS, [])
         if user_input is not None:
-            if not user_input.get(CONF_SUN_AZIMUTH_SENSOR):
-                user_input.pop(CONF_SUN_AZIMUTH_SENSOR, None)
+            _clean_cover_input(user_input)
             if _cover_already_added(covers, user_input[CONF_COVER]):
                 errors["base"] = "cover_already_added"
             else:
@@ -408,8 +415,7 @@ class CoverControlAdvancedOptionsFlow(config_entries.OptionsFlowWithConfigEntry)
         errors: dict[str, str] = {}
         if user_input is not None:
             new_cover_entity = user_input[CONF_COVER]
-            if not user_input.get(CONF_SUN_AZIMUTH_SENSOR):
-                user_input.pop(CONF_SUN_AZIMUTH_SENSOR, None)
+            _clean_cover_input(user_input)
             duplicate_cover = any(
                 i != selected_idx and c[CONF_COVER] == new_cover_entity
                 for i, c in enumerate(covers)
