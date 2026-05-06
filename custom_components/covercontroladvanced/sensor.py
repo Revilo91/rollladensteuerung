@@ -16,6 +16,7 @@ from .const import (
     CONF_ROOM_NAME,
     CONF_SHADING_HEIGHT,
     CONF_SUN_AZIMUTH_END,
+    CONF_SUN_AZIMUTH_SENSOR,
     CONF_SUN_AZIMUTH_START,
     DOMAIN,
 )
@@ -38,6 +39,10 @@ async def async_setup_entry(
         entities.append(
             CoverControlAdvancedStatusSensor(entry, ctrl, cover_cfg, device_info, c_name)
         )
+        if cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR):
+            entities.append(
+                CoverControlAdvancedSunSensorSensor(entry, cover_cfg, device_info, c_name)
+            )
         entities.append(
             CoverControlAdvancedAzimuthStartSensor(entry, cover_cfg, device_info, c_name)
         )
@@ -107,6 +112,32 @@ class CoverControlAdvancedStatusSensor(SensorEntity):
     def native_value(self) -> str:
         cover = self._cover_cfg[CONF_COVER]
         return self._ctrl.last_reasons.get(cover, "initializing")
+
+
+class CoverControlAdvancedSunSensorSensor(SensorEntity):
+    _attr_icon = "mdi:weather-sunny"
+    _attr_should_poll = False
+    _attr_has_entity_name = True
+    _attr_translation_key = "sun_sensor"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self,
+        entry: ConfigEntry,
+        cover_cfg: dict,
+        device_info: DeviceInfo,
+        cover_name: str | None,
+    ) -> None:
+        cover = cover_cfg[CONF_COVER]
+        self._cover_cfg = cover_cfg
+        self._attr_unique_id = f"{entry.entry_id}_{cover}_sun_sensor"
+        self._attr_device_info = device_info
+        if cover_name:
+            self._attr_name = f"{cover_name} Sonnenlichtsensor"
+
+    @property
+    def native_value(self) -> str | None:
+        return self._cover_cfg.get(CONF_SUN_AZIMUTH_SENSOR)
 
 
 class CoverControlAdvancedAzimuthStartSensor(SensorEntity):
