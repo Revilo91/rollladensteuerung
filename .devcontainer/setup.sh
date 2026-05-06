@@ -30,6 +30,7 @@ cp "$WORKSPACE_ROOT/.devcontainer/configuration.yaml" "$CONFIG_DIR/configuration
 cp "$WORKSPACE_ROOT/.devcontainer/automations.yaml" "$CONFIG_DIR/automations.yaml"
 cp "$WORKSPACE_ROOT/.devcontainer/scripts.yaml" "$CONFIG_DIR/scripts.yaml"
 cp "$WORKSPACE_ROOT/.devcontainer/scenes.yaml" "$CONFIG_DIR/scenes.yaml"
+cp "$WORKSPACE_ROOT/.devcontainer/secrets.yaml" "$CONFIG_DIR/secrets.yaml"
 
 echo "Development setup complete"
 echo "Config directory: $CONFIG_DIR"

@@ -3,7 +3,8 @@ from collections.abc import Callable
 from datetime import timedelta
 from typing import TYPE_CHECKING
 
-from homeassistant.components.cover import DOMAIN as COVER_DOMAIN, CoverEntityFeature
+from homeassistant.components.cover import DOMAIN as COVER_DOMAIN
+from homeassistant.components.cover import CoverEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_SUPPORTED_FEATURES, STATE_ON
 from homeassistant.core import Event, HomeAssistant, callback

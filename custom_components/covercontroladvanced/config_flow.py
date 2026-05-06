@@ -5,7 +5,12 @@ from copy import deepcopy
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers import area_registry, device_registry, entity_registry, selector
+from homeassistant.helpers import (
+    area_registry,
+    device_registry,
+    entity_registry,
+    selector,
+)
 
 from .const import (
     CONF_COVER,
@@ -237,6 +242,13 @@ def _cover_schema_with_defaults(
     existing_start = cover_cfg.get(CONF_SUN_AZIMUTH_START)
     existing_end = cover_cfg.get(CONF_SUN_AZIMUTH_END)
 
+    # Extract azimuth values from sensor attributes if available
+    sensor_start, sensor_end = _extract_azimuth_from_sensor(hass, existing_sensor)
+
+    # Use sensor-derived values if existing values are not set
+    suggested_start = existing_start if existing_start is not None else sensor_start
+    suggested_end = existing_end if existing_end is not None else sensor_end
+
     sun_sensor_key = (
         vol.Optional(CONF_SUN_AZIMUTH_SENSOR, default=existing_sensor)
         if existing_sensor
@@ -260,7 +272,7 @@ def _cover_schema_with_defaults(
             ),
             vol.Optional(
                 CONF_SUN_AZIMUTH_START,
-                description={"suggested_value": existing_start} if existing_start is not None else None,
+                description={"suggested_value": suggested_start} if suggested_start is not None else None,
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0,
@@ -272,7 +284,7 @@ def _cover_schema_with_defaults(
             ),
             vol.Optional(
                 CONF_SUN_AZIMUTH_END,
-                description={"suggested_value": existing_end} if existing_end is not None else None,
+                description={"suggested_value": suggested_end} if suggested_end is not None else None,
             ): selector.NumberSelector(
                 selector.NumberSelectorConfig(
                     min=0,
@@ -392,6 +404,41 @@ def _clean_cover_input(user_input: dict) -> None:
 def _resolve_room_name(flow: config_entries.ConfigFlow, value: str) -> str:
     area = area_registry.async_get(flow.hass).async_get_area(value)
     return area.name if area is not None else value
+
+
+def _extract_azimuth_from_sensor(hass: HomeAssistant, sensor_entity_id: str | None) -> tuple[int | None, int | None]:
+    """Extract Upper and Lower attributes from sun direction sensor.
+
+    Returns (start_azimuth, end_azimuth) tuple where:
+    - start_azimuth comes from the 'Lower' attribute
+    - end_azimuth comes from the 'Upper' attribute
+    """
+    if not sensor_entity_id:
+        return (None, None)
+
+    state = hass.states.get(sensor_entity_id)
+    if not state or not state.attributes:
+        return (None, None)
+
+    lower = state.attributes.get("Lower")
+    upper = state.attributes.get("Upper")
+
+    start_azimuth = None
+    end_azimuth = None
+
+    if lower is not None:
+        try:
+            start_azimuth = int(float(lower))
+        except (TypeError, ValueError):
+            pass
+
+    if upper is not None:
+        try:
+            end_azimuth = int(float(upper))
+        except (TypeError, ValueError):
+            pass
+
+    return (start_azimuth, end_azimuth)
 
 
 class CoverControlAdvancedConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
