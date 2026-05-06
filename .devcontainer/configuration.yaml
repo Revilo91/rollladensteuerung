@@ -16,6 +16,31 @@ logger:
   logs:
     custom_components.covercontroladvanced: debug
 
+remote_homeassistant:
+  instances:
+    - host: !secret remote_ha_host
+      port: !secret remote_ha_port
+      secure: !secret remote_ha_secure
+      verify_ssl: !secret remote_ha_verify_ssl
+      access_token: !secret remote_ha_access_token
+      entity_prefix: "remote_"
+      entity_friendly_name_prefix: "Remote "
+      include:
+        domains:
+          - input_boolean
+          - input_number
+          - input_select
+          - input_text
+          - input_datetime
+          - counter
+          - timer
+          - select
+          - binary_sensor
+          - sensor
+      exclude:
+        domains:
+          - persistent_notification
+
 input_boolean:
   day_night_mode:
     name: Day Night Mode (On = Day)
