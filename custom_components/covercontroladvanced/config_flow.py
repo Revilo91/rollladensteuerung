@@ -237,6 +237,12 @@ def _cover_schema_with_defaults(
     existing_start = cover_cfg.get(CONF_SUN_AZIMUTH_START)
     existing_end = cover_cfg.get(CONF_SUN_AZIMUTH_END)
 
+    sun_sensor_key = (
+        vol.Optional(CONF_SUN_AZIMUTH_SENSOR, default=existing_sensor)
+        if existing_sensor
+        else vol.Optional(CONF_SUN_AZIMUTH_SENSOR)
+    )
+
     return vol.Schema(
         {
             vol.Required(
@@ -247,10 +253,7 @@ def _cover_schema_with_defaults(
                 CONF_WINDOW_ENTITIES,
                 default=cover_cfg.get(CONF_WINDOW_ENTITIES, []),
             ): window_selector,
-            vol.Optional(
-                CONF_SUN_AZIMUTH_SENSOR,
-                description={"suggested_value": existing_sensor} if existing_sensor else None,
-            ): selector.EntitySelector(
+            sun_sensor_key: selector.EntitySelector(
                 selector.EntitySelectorConfig(
                     domain="binary_sensor", device_class=["light"]
                 )

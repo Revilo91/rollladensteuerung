@@ -140,6 +140,9 @@
       "azimuth_end": {
         "name": "Sonnen-Azimut Ende"
       },
+      "sun_sensor": {
+        "name": "Sonnenlichtsensor"
+      },
       "shading_height": {
         "name": "Beschattungsh\u00f6he"
       },
